@@ -79,5 +79,14 @@ class AuthController extends Controller
         }
     }
 
-  
+    public function updateUser(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $user->update($request->only(['name', 'email']));
+            return response()->json($user);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Failed to update user'], 500);
+        }
+    }
 }
