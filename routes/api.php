@@ -50,4 +50,9 @@ Route::middleware('jwt')->group(function () {
         // Route::get('/admin/dashboard', [AdminController::class, 'index']);
         // Route::apiResource('/users', UserController::class);
     });
+
+    Route::middleware(['jwt', 'magasinier'])->group(function () {
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::post('/products', [ProductController::class, 'store']);
+});
 });
