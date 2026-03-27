@@ -13,8 +13,11 @@ class AdminMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
-    {
+    public function handle(Request $request, Closure $next)
+{
+    if (auth()->check() && auth()->user()->role === 'admin') {
         return $next($request);
     }
+    return redirect('/')->with('error', 'Unauthorized access.');
+}
 }
