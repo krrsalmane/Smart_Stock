@@ -18,6 +18,6 @@ class AdminMiddleware
     if (auth()->check() && auth()->user()->role === 'admin') {
         return $next($request);
     }
-    return redirect('/')->with('error', 'Unauthorized access.');
+    return response()->json(['error' => 'Unauthorized access. Admins only.'], 403);
 }
 }

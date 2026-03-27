@@ -16,7 +16,7 @@ use App\Http\Controllers\CommandController;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', [PublicController::class, 'index']);
+// Route::get('/', [PublicController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -33,21 +33,21 @@ Route::middleware('jwt')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Routes for Clients (General Authenticated Users)
-    Route::post('/commands', [CommandController::class, 'store']);
+    // Route::post('/commands', [CommandController::class, 'store']);
 
     /*
     |-- Magasinier Specific Routes --|
     */
     Route::middleware('magasinier')->group(function () {
-        Route::get('/warehouse', [WarehouseController::class, 'index']);
-        Route::post('/mouvements', [MouvementController::class, 'store']);
+        // Route::get('/warehouse', [WarehouseController::class, 'index']);
+        // Route::post('/mouvements', [MouvementController::class, 'store']);
     });
 
     /*
     |-- Admin Specific Routes --|
     */
     Route::middleware('admin')->group(function () {
-        Route::get('/admin/dashboard', [AdminController::class, 'index']);
-        Route::apiResource('/users', UserController::class);
+        // Route::get('/admin/dashboard', [AdminController::class, 'index']);
+        // Route::apiResource('/users', UserController::class);
     });
 });

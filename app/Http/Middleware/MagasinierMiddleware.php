@@ -18,6 +18,6 @@ class MagasinierMiddleware
         if (auth()->check() && auth()->user()->role === 'magasinier') {
         return $next($request);
     }
-    return redirect('/')->with('error', 'Only Magasiniers can access the warehouse.');
+    return response()->json(['error' => 'Forbidden. Only Magasiniers can access this resource.'], 403);
     }
 }
