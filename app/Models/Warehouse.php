@@ -19,4 +19,8 @@ class Warehouse extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    protected $table = 'warehouses'; // Explicitly naming it to avoid 'warhouses' typos
+    
+    
 }
