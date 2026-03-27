@@ -32,6 +32,13 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    
+    // Relationships for the different roles
+    public function commandsAsClient() {
+        return $this->hasMany(Command::class, 'client_id');
+    }
+
+
 
     /**
      * Get the identifier that will be stored in the JWT token.
