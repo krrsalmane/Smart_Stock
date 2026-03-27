@@ -32,7 +32,12 @@ class ProductController extends Controller
         }
 
         // 2. Create the Product record
-       
+        $product = Product::create($request->all());
+
+        return response()->json([
+            'message' => 'Product added to inventory successfully',
+            'product' => $product->load(['category', 'warehouse'])
+        ], 201);
     }
 
 
