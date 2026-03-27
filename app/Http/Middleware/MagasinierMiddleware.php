@@ -15,6 +15,9 @@ class MagasinierMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (auth()->check() && auth()->user()->role === 'magasinier') {
         return $next($request);
+    }
+    return redirect('/')->with('error', 'Only Magasiniers can access the warehouse.');
     }
 }
