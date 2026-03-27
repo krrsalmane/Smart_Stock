@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 // Import all your controllers
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\MouvementController;
