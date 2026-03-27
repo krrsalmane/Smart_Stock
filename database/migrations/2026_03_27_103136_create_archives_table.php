@@ -15,10 +15,10 @@ return new class extends Migration
          $table->id();
          $table->integer('quantity');
     
-    $table->foreignId('product_id')->constrained()->onDelete('cascade');
-    $table->foreignId('user_id')->constrained(); 
+         $table->foreignId('product_id')->constrained()->onDelete('cascade');
+          $table->foreignId('user_id')->constrained(); 
     
-    $table->timestamp('created_at'); 
+         $table->timestamp('created_at'); 
 });
     }
 
