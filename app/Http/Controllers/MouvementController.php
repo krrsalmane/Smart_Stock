@@ -52,5 +52,29 @@ class MouvementController extends Controller
     }
 
     // Update a mouvement
-   
+    public function update(Request $request, $id)
+    {
+        $mouvement = Mouvement::find($id);
+
+        if (!$mouvement) {
+            return response()->json(['error' => 'Mouvement not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'type' => 'sometimes|in:IN,OUT,ADJ',
+            'quantity' => 'sometimes|integer|min:1',
+            'note' => 'sometimes|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $mouvement->update($request->all());
+
+        return response()->json([
+            'message' => 'Mouvement updated successfully',
+            'mouvement' => $mouvement->load(['product', 'command', 'user'])
+        ]);
+    }
 }
