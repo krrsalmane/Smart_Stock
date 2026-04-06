@@ -39,5 +39,18 @@ class MouvementController extends Controller
         ], 201);
     }
 
-    
+    // Get a specific mouvement
+    public function show($id)
+    {
+        $mouvement = Mouvement::with(['product', 'command', 'user'])->find($id);
+
+        if (!$mouvement) {
+            return response()->json(['error' => 'Mouvement not found'], 404);
+        }
+
+        return response()->json($mouvement);
+    }
+
+    // Update a mouvement
+   
 }
