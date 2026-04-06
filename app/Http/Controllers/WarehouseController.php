@@ -67,6 +67,9 @@ class WarehouseController extends Controller
 
         $warehouse->update($request->all());
 
-      
+        return response()->json([
+            'message' => 'Warehouse updated successfully',
+            'warehouse' => $warehouse->load('products')
+        ]);
     }
 }
