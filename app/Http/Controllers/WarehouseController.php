@@ -36,7 +36,16 @@ class WarehouseController extends Controller
     }
 
     // Get a specific warehouse
-  
+    public function show($id)
+    {
+        $warehouse = Warehouse::with('products')->find($id);
+
+        if (!$warehouse) {
+            return response()->json(['error' => 'Warehouse not found'], 404);
+        }
+
+        return response()->json($warehouse);
+    }
 
    
 }
