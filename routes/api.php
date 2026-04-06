@@ -34,7 +34,10 @@ Route::middleware('jwt')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Routes for Clients (General Authenticated Users)
-    // Route::post('/commands', [CommandController::class, 'store']);
+    Route::get('/commands', [CommandController::class, 'index']);
+    Route::get('/commands/{id}', [CommandController::class, 'show']);
+    Route::post('/commands', [CommandController::class, 'store']);
+    Route::put('/commands/{id}', [CommandController::class, 'update']);
 
     /*
     |-- Magasinier Specific Routes --|
