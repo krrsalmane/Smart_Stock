@@ -40,7 +40,10 @@ Route::middleware('jwt')->group(function () {
     |-- Magasinier Specific Routes --|
     */
     Route::middleware('magasinier')->group(function () {
-        // Route::get('/warehouse', [WarehouseController::class, 'index']);
+        Route::get('/warehouses', [WarehouseController::class, 'index']);
+        Route::post('/warehouses', [WarehouseController::class, 'store']);
+        Route::get('/warehouses/{id}', [WarehouseController::class, 'show']);
+        Route::put('/warehouses/{id}', [WarehouseController::class, 'update']);
         // Route::post('/mouvements', [MouvementController::class, 'store']);
     });
 
