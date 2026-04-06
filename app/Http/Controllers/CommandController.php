@@ -72,5 +72,27 @@ class CommandController extends Controller
     }
 
     // Update command status
+    public function update(Request $request, $id)
+    {
+        $command = Command::find($id);
 
+        if (!$command) {
+            return response()->json(['error' => 'Command not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'sometimes|in:pending,approved,received,cancelled',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $command->update($request->all());
+
+        return response()->json([
+            'message' => 'Command updated successfully',
+            'command' => $command->load(['client', 'products'])
+        ]);
+    }
 }
