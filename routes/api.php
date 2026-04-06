@@ -47,7 +47,14 @@ Route::middleware('jwt')->group(function () {
         Route::post('/warehouses', [WarehouseController::class, 'store']);
         Route::get('/warehouses/{id}', [WarehouseController::class, 'show']);
         Route::put('/warehouses/{id}', [WarehouseController::class, 'update']);
-        // Route::post('/mouvements', [MouvementController::class, 'store']);
+        
+       // Route::post('/mouvements', [MouvementController::class, 'store']);
+
+        
+        Route::get('/mouvements', [MouvementController::class, 'index']);
+        Route::post('/mouvements', [MouvementController::class, 'store']);
+        Route::get('/mouvements/{id}', [MouvementController::class, 'show']);
+        Route::put('/mouvements/{id}', [MouvementController::class, 'update']);
     });
 
     /*
