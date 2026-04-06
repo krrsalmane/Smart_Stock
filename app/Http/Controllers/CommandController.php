@@ -60,5 +60,17 @@ class CommandController extends Controller
     }
 
     // Get a specific command
-   
+    public function show($id)
+    {
+        $command = Command::with(['client', 'products'])->find($id);
+
+        if (!$command) {
+            return response()->json(['error' => 'Command not found'], 404);
+        }
+
+        return response()->json($command);
+    }
+
+    // Update command status
+
 }
