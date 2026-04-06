@@ -47,5 +47,26 @@ class WarehouseController extends Controller
         return response()->json($warehouse);
     }
 
-   
+    // Update a warehouse
+    public function update(Request $request, $id)
+    {
+        $warehouse = Warehouse::find($id);
+
+        if (!$warehouse) {
+            return response()->json(['error' => 'Warehouse not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'address' => 'sometimes|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $warehouse->update($request->all());
+
+      
+    }
 }
