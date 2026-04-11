@@ -37,7 +37,19 @@ Route::middleware('jwt')->group(function () {
     // Routes for Clients (General Authenticated Users)
     // Route::post('/commands', [CommandController::class, 'store']);
 
-  
+    // Supplier Routes (accessible to authenticated users)
+    Route::get('/suppliers', [SupplierController::class, 'index']);
+    Route::get('/suppliers/{id}', [SupplierController::class, 'show']);
+    Route::post('/suppliers', [SupplierController::class, 'store']);
+    Route::put('/suppliers/{id}', [SupplierController::class, 'update']);
+    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy']);
+    
+    // Supplier-Product & Supplier-Command Relationships
+    Route::post('/suppliers/{id}/products', [SupplierController::class, 'attachProduct']);
+    Route::delete('/suppliers/{id}/products/{productId}', [SupplierController::class, 'detachProduct']);
+    Route::post('/suppliers/{id}/commands', [SupplierController::class, 'attachCommand']);
+    Route::delete('/suppliers/{id}/commands/{commandId}', [SupplierController::class, 'detachCommand']);
+
     /*
     |-- Magasinier Specific Routes --|
     */
