@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommandController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,10 +54,8 @@ Route::middleware('jwt')->group(function () {
     Route::post('/suppliers/{id}/commands', [SupplierController::class, 'attachCommand']);
     Route::delete('/suppliers/{id}/commands/{commandId}', [SupplierController::class, 'detachCommand']);
 
-    /*
-    |-- Magasinier Specific Routes --|
-    */
-    Route::middleware('magasinier')->group(function () {
+  
+        // Warehouses
         Route::get('/warehouses', [WarehouseController::class, 'index']);
         Route::post('/warehouses', [WarehouseController::class, 'store']);
         Route::get('/warehouses/{id}', [WarehouseController::class, 'show']);
