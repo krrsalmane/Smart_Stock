@@ -96,6 +96,30 @@ class SupplierController extends Controller
         ]);
     }
 
-  
+    /**
+     * Delete a supplier
+     */
+    public function destroy($id)
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $supplier->delete();
+
+        return response()->json([
+            'message' => 'Supplier deleted successfully'
+        ]);
+    }
+
+    /**
+     * Link a product to a supplier with cost price and lead time
+     */
+    
+   
    
 }
