@@ -43,7 +43,24 @@ class CategoryController extends Controller
         ], 201);
     }
 
-   
+    /**
+     * Get a specific category with its products
+     */
+    public function show($id)
+    {
+        try {
+            $category = Category::with('products')->findOrFail($id);
+
+            return response()->json([
+                'message' => 'Category retrieved successfully',
+                'category' => $category
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Category not found'
+            ], 404);
+        }
+    }
 
 
    
