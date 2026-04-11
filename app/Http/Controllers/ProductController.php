@@ -92,7 +92,22 @@ class ProductController extends Controller
         ], 200);
     }
 
-    
+    public function destroy($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Product not found'
+            ], 404);
+        }
+
+        $product->delete();
+
+        return response()->json([
+            'message' => 'Product deleted successfully'
+        ], 200);
+    }
 
 
 }
