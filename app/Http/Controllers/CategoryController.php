@@ -62,6 +62,35 @@ class CategoryController extends Controller
         }
     }
 
+    /**
+     * Update a category
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $category = Category::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Category not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255|unique:categories,name,' . $id,
+            'description' => 'sometimes|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $category->update($request->all());
+
+        return response()->json([
+            'message' => 'Category updated successfully',
+            'category' => $category->load('products')
+        ]);
+    }
 
    
 }
