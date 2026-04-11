@@ -21,6 +21,29 @@ class SupplierController extends Controller
         ]);
     }
 
+    /**
+     * Create a new supplier
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:suppliers,email',
+            'phone' => 'sometimes|string|max:20',
+            'address' => 'sometimes|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $supplier = Supplier::create($request->all());
+
+        return response()->json([
+            'message' => 'Supplier created successfully',
+            'supplier' => $supplier->load(['products', 'commands'])
+        ], 201);
+    }
 
   
 
