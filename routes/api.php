@@ -52,8 +52,5 @@ Route::middleware('jwt')->group(function () {
         // Route::apiResource('/users', UserController::class);
     });
 
-    Route::middleware(['jwt', 'magasinier'])->group(function () {
-    Route::get('/products', [ProductController::class, 'index']);
-    Route::post('/products', [ProductController::class, 'store']);
-});
+  
 });

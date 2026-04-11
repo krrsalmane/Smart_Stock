@@ -42,5 +42,25 @@ class ProductController extends Controller
         ], 201);
     }
 
+    public function show($id)
+    {
+        try {
+            $product = Product::with(['category', 'warehouse', 'alerts', 'commands', 'movements'])->findOrFail($id);
+            
+            return response()->json([
+                'message' => 'Product retrieved successfully',
+                'product' => $product
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Product not found'
+            ], 404);
+        }
+    }
+
+    
+
+    
+
 
 }
