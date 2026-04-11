@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Warehouse extends Model
 {
-    protected $fillable = ['name', 'address'];
+    protected $fillable = ['name', 'address', 'user_id'];
 
     // According to your diagram, a warehouse "contains" products
     public function products()
