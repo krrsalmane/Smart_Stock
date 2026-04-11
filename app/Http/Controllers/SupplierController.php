@@ -45,7 +45,24 @@ class SupplierController extends Controller
         ], 201);
     }
 
-  
+    /**
+     * Get a specific supplier
+     */
+    public function show($id)
+    {
+        try {
+            $supplier = Supplier::with(['products', 'commands'])->findOrFail($id);
+
+            return response()->json([
+                'message' => 'Supplier retrieved successfully',
+                'supplier' => $supplier
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+    }
 
   
   
