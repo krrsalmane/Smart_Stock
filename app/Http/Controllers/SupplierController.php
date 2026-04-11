@@ -64,7 +64,38 @@ class SupplierController extends Controller
         }
     }
 
-  
+    /**
+     * Update a supplier
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:suppliers,email,' . $id,
+            'phone' => 'sometimes|string|max:20',
+            'address' => 'sometimes|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $supplier->update($request->all());
+
+        return response()->json([
+            'message' => 'Supplier updated successfully',
+            'supplier' => $supplier->load(['products', 'commands'])
+        ]);
+    }
+
   
    
 }
