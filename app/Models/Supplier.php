@@ -11,6 +11,7 @@ class Supplier extends Model
 
     /**
      * Get the products that this supplier provides.
+     * A supplier provides many products, and a product can be provided by many suppliers.
      */
     public function products(): BelongsToMany
     {
@@ -21,6 +22,7 @@ class Supplier extends Model
 
     /**
      * Get the commands sent to this supplier.
+     * A supplier receives many commands, and a command can be sent to many suppliers.
      */
     public function commands(): BelongsToMany
     {

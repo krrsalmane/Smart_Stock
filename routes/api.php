@@ -35,7 +35,10 @@ Route::middleware('jwt')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Routes for Clients (General Authenticated Users)
-    // Route::post('/commands', [CommandController::class, 'store']);
+    Route::get('/commands', [CommandController::class, 'index']);
+    Route::get('/commands/{id}', [CommandController::class, 'show']);
+    Route::post('/commands', [CommandController::class, 'store']);
+    Route::put('/commands/{id}', [CommandController::class, 'update']);
 
     // Supplier Routes (accessible to authenticated users)
     Route::get('/suppliers', [SupplierController::class, 'index']);
@@ -58,7 +61,14 @@ Route::middleware('jwt')->group(function () {
         Route::post('/warehouses', [WarehouseController::class, 'store']);
         Route::get('/warehouses/{id}', [WarehouseController::class, 'show']);
         Route::put('/warehouses/{id}', [WarehouseController::class, 'update']);
-        // Route::post('/mouvements', [MouvementController::class, 'store']);
+        
+       // Route::post('/mouvements', [MouvementController::class, 'store']);
+
+        
+        Route::get('/mouvements', [MouvementController::class, 'index']);
+        Route::post('/mouvements', [MouvementController::class, 'store']);
+        Route::get('/mouvements/{id}', [MouvementController::class, 'show']);
+        Route::put('/mouvements/{id}', [MouvementController::class, 'update']);
     });
 
     /*
@@ -70,7 +80,10 @@ Route::middleware('jwt')->group(function () {
     });
 
     Route::middleware(['jwt', 'magasinier'])->group(function () {
-    Route::get('/products', [ProductController::class, 'index']);
-    Route::post('/products', [ProductController::class, 'store']);
-});
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    });
 });

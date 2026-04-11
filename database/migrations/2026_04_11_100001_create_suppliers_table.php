@@ -11,7 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Suppliers table
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -21,18 +20,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Pivot table for Supplier-Product relationship
-        Schema::create('product_supplier', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
-            $table->double('cost_price')->nullable();
-            $table->integer('lead_time')->nullable(); // in days
-            $table->timestamps();
-            $table->unique(['product_id', 'supplier_id']);
-        });
-
-        // Pivot table for Supplier-Command relationship
+        // Pivot table for Command-Supplier relationship
         Schema::create('command_supplier', function (Blueprint $table) {
             $table->id();
             $table->foreignId('command_id')->constrained()->onDelete('cascade');
@@ -41,7 +29,16 @@ return new class extends Migration
             $table->date('order_date')->nullable();
             $table->date('expected_delivery')->nullable();
             $table->timestamps();
-            $table->unique(['command_id', 'supplier_id']);
+        });
+
+        // Pivot table for Product-Supplier relationship
+        Schema::create('product_supplier', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('supplier_id')->constrained()->onDelete('cascade');
+            $table->double('cost_price')->nullable();
+            $table->integer('lead_time')->nullable(); // in days
+            $table->timestamps();
         });
     }
 
