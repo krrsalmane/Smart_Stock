@@ -21,7 +21,27 @@ class CategoryController extends Controller
         ]);
     }
 
-   
+    /**
+     * Create a new category
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:categories,name',
+            'description' => 'sometimes|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $category = Category::create($request->all());
+
+        return response()->json([
+            'message' => 'Category created successfully',
+            'category' => $category->load('products')
+        ], 201);
+    }
 
    
 
