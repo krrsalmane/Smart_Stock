@@ -8,7 +8,18 @@ use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
-    
+    /**
+     * Get all suppliers
+     */
+    public function index()
+    {
+        $suppliers = Supplier::with(['products', 'commands'])->get();
+
+        return response()->json([
+            'message' => 'Suppliers retrieved successfully',
+            'suppliers' => $suppliers
+        ]);
+    }
 
 
   
