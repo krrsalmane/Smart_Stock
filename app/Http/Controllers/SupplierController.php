@@ -200,6 +200,31 @@ class SupplierController extends Controller
         ]);
     }
 
-   
+    /**
+     * Detach a product from a supplier
+     */
+    public function detachProduct($id, $productId)
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        if (!$supplier->products()->where('product_id', $productId)->exists()) {
+            return response()->json([
+                'message' => 'Product not associated with this supplier'
+            ], 404);
+        }
+
+        $supplier->products()->detach($productId);
+
+        return response()->json([
+            'message' => 'Product removed from supplier successfully'
+        ]);
+    }
+
    
 }
