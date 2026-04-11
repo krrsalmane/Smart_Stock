@@ -226,5 +226,29 @@ class SupplierController extends Controller
         ]);
     }
 
-   
+    /**
+     * Detach a command from a supplier
+     */
+    public function detachCommand($id, $commandId)
+    {
+        try {
+            $supplier = Supplier::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        if (!$supplier->commands()->where('command_id', $commandId)->exists()) {
+            return response()->json([
+                'message' => 'Command not associated with this supplier'
+            ], 404);
+        }
+
+        $supplier->commands()->detach($commandId);
+
+        return response()->json([
+            'message' => 'Command removed from supplier successfully'
+        ]);
+    }
 }
