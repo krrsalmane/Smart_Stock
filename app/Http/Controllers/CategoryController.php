@@ -92,5 +92,23 @@ class CategoryController extends Controller
         ]);
     }
 
-   
+    /**
+     * Delete a category
+     */
+    public function destroy($id)
+    {
+        try {
+            $category = Category::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Category not found'
+            ], 404);
+        }
+
+        $category->delete();
+
+        return response()->json([
+            'message' => 'Category deleted successfully'
+        ]);
+    }
 }
