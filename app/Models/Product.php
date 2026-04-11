@@ -71,4 +71,14 @@ class Product extends Model
     {
         return $this->hasMany(Alert::class);
     }
+
+    /**
+     * Get the suppliers who provide this product.
+     */
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(Supplier::class)
+                    ->withPivot('cost_price', 'lead_time')
+                    ->withTimestamps();
+    }
 }

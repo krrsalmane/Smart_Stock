@@ -11,6 +11,7 @@ use App\Http\Controllers\MouvementController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommandController;
+use App\Http\Controllers\SupplierController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ Route::middleware('jwt')->group(function () {
     // Routes for Clients (General Authenticated Users)
     // Route::post('/commands', [CommandController::class, 'store']);
 
+  
     /*
     |-- Magasinier Specific Routes --|
     */
