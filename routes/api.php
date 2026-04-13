@@ -11,13 +11,25 @@ use App\Http\Controllers\MouvementController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommandController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AlertController;
 
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
-// Route::get('/', [PublicController::class, 'index']);
+// Swagger Documentation
+Route::get('/documentation', function () {
+    return response()->file(storage_path('api-docs/swagger.json'));
+});
+
+Route::get('/docs', function () {
+    return view('swagger-ui');
+})->name('swagger.ui');
+
+// Authentication
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -39,34 +51,70 @@ Route::middleware('jwt')->group(function () {
     Route::post('/commands', [CommandController::class, 'store']);
     Route::put('/commands/{id}', [CommandController::class, 'update']);
 
+    // Supplier Routes (accessible to authenticated users)
+    Route::get('/suppliers', [SupplierController::class, 'index']);
+    Route::get('/suppliers/{id}', [SupplierController::class, 'show']);
+    Route::post('/suppliers', [SupplierController::class, 'store']);
+    Route::put('/suppliers/{id}', [SupplierController::class, 'update']);
+    Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy']);
+    
+    // Supplier-Product & Supplier-Command Relationships
+    Route::post('/suppliers/{id}/products', [SupplierController::class, 'attachProduct']);
+    Route::delete('/suppliers/{id}/products/{productId}', [SupplierController::class, 'detachProduct']);
+    Route::post('/suppliers/{id}/commands', [SupplierController::class, 'attachCommand']);
+    Route::delete('/suppliers/{id}/commands/{commandId}', [SupplierController::class, 'detachCommand']);
+
+    // Alert Routes (accessible to authenticated users)
+    Route::get('/alerts', [AlertController::class, 'index']);
+    Route::get('/alerts/{id}', [AlertController::class, 'show']);
+    Route::put('/alerts/{id}', [AlertController::class, 'update']);
+    Route::delete('/alerts/{id}', [AlertController::class, 'destroy']);
+    Route::get('/alerts/active/count', [AlertController::class, 'getActiveCount']);
+    Route::get('/alerts/low-stock/list', [AlertController::class, 'getLowStockAlerts']);
+
+use App\Http\Controllers\ArchiveController;
+
     /*
     |-- Magasinier Specific Routes --|
     */
     Route::middleware('magasinier')->group(function () {
+        // Archives
+        Route::get('/archives', [ArchiveController::class, 'index']);
+        Route::get('/archives/{id}', [ArchiveController::class, 'show']);
+        Route::post('/archives', [ArchiveController::class, 'store']);
+
+        // Categories
+        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::post('/categories', [CategoryController::class, 'store']);
+        Route::get('/categories/{id}', [CategoryController::class, 'show']);
+        Route::put('/categories/{id}', [CategoryController::class, 'update']);
+        Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+        // Warehouses
         Route::get('/warehouses', [WarehouseController::class, 'index']);
         Route::post('/warehouses', [WarehouseController::class, 'store']);
         Route::get('/warehouses/{id}', [WarehouseController::class, 'show']);
         Route::put('/warehouses/{id}', [WarehouseController::class, 'update']);
-        
-       // Route::post('/mouvements', [MouvementController::class, 'store']);
 
-        
+        // Mouvements
         Route::get('/mouvements', [MouvementController::class, 'index']);
         Route::post('/mouvements', [MouvementController::class, 'store']);
         Route::get('/mouvements/{id}', [MouvementController::class, 'show']);
         Route::put('/mouvements/{id}', [MouvementController::class, 'update']);
+
+        // Products
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     });
 
     /*
     |-- Admin Specific Routes --|
     */
     Route::middleware('admin')->group(function () {
-        // Route::get('/admin/dashboard', [AdminController::class, 'index']);
-        // Route::apiResource('/users', UserController::class);
+        Route::get('/admin/dashboard', [AdminController::class, 'index']);
+        Route::apiResource('/users', UserController::class);
     });
-
-    Route::middleware(['jwt', 'magasinier'])->group(function () {
-    Route::get('/products', [ProductController::class, 'index']);
-    Route::post('/products', [ProductController::class, 'store']);
-});
 });
