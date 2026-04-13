@@ -19,6 +19,15 @@ use App\Http\Controllers\CategoryController;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+// Swagger Documentation
+Route::get('/documentation', function () {
+    return response()->file(storage_path('api-docs/swagger.json'));
+});
+
+Route::get('/docs', function () {
+    return view('swagger-ui');
+})->name('swagger.ui');
+
 // Route::get('/', [PublicController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
