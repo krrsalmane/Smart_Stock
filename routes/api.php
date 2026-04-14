@@ -14,6 +14,7 @@ use App\Http\Controllers\CommandController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\ArchiveController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,8 +72,6 @@ Route::middleware('jwt')->group(function () {
     Route::delete('/alerts/{id}', [AlertController::class, 'destroy']);
     Route::get('/alerts/active/count', [AlertController::class, 'getActiveCount']);
     Route::get('/alerts/low-stock/list', [AlertController::class, 'getLowStockAlerts']);
-
-use App\Http\Controllers\ArchiveController;
 
     /*
     |-- Magasinier Specific Routes --|
