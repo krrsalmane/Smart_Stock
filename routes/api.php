@@ -13,6 +13,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommandController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AlertController;
+use App\Http\Controllers\ArchiveController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -92,7 +95,21 @@ Route::middleware('jwt')->group(function () {
         Route::get('/products/{id}', [ProductController::class, 'show']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+
+        // Alerts
+        Route::get('/alerts', [AlertController::class, 'index']);
+        Route::get('/alerts/active/count', [AlertController::class, 'getActiveCount']);
+        Route::get('/alerts/low-stock/list', [AlertController::class, 'getLowStockAlerts']);
+        Route::get('/alerts/{id}', [AlertController::class, 'show']);
+        Route::put('/alerts/{id}', [AlertController::class, 'update']);
+        Route::delete('/alerts/{id}', [AlertController::class, 'destroy']);
+
+        // Archives
+        Route::get('/archives', [ArchiveController::class, 'index']);
+        Route::get('/archives/{id}', [ArchiveController::class, 'show']);
+        Route::post('/archives', [ArchiveController::class, 'store']);
     });
+
 
     /*
     |-- Admin Specific Routes --|
@@ -102,11 +119,5 @@ Route::middleware('jwt')->group(function () {
         Route::apiResource('/users', UserController::class);
     });
 
-    Route::middleware(['jwt', 'magasinier'])->group(function () {
-        Route::get('/products', [ProductController::class, 'index']);
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::get('/products/{id}', [ProductController::class, 'show']);
-        Route::put('/products/{id}', [ProductController::class, 'update']);
-        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-    });
+
 });

@@ -16,8 +16,7 @@ class Supplier extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class)
-                    ->withPivot('cost_price', 'lead_time')
-                    ->withTimestamps();
+                    ->withPivot('cost_price', 'lead_time');
     }
 
     /**
@@ -27,7 +26,6 @@ class Supplier extends Model
     public function commands(): BelongsToMany
     {
         return $this->belongsToMany(Command::class)
-                    ->withPivot('quantity_ordered', 'order_date', 'expected_delivery')
-                    ->withTimestamps();
+                    ->withPivot('quantity_ordered', 'order_date', 'expected_delivery');
     }
 }

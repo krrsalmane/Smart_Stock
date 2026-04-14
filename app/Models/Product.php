@@ -51,8 +51,7 @@ class Product extends Model
     public function commands(): BelongsToMany
     {
         return $this->belongsToMany(Command::class)
-                    ->withPivot('quantity', 'unit_price')
-                    ->withTimestamps();
+                    ->withPivot('quantity', 'unit_price');
     }
 
     /**
@@ -78,7 +77,6 @@ class Product extends Model
     public function suppliers(): BelongsToMany
     {
         return $this->belongsToMany(Supplier::class)
-                    ->withPivot('cost_price', 'lead_time')
-                    ->withTimestamps();
+                    ->withPivot('cost_price', 'lead_time');
     }
 }

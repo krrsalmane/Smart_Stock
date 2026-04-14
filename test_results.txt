@@ -1,0 +1,87 @@
+﻿
+[1;35mÔòöÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòù[0m
+[1;35mÔòæ   SmartStock API - Automated Smoke Test      Ôòæ[0m
+[1;35mÔòÜÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòØ[0m
+
+[32mÔ£ô Server is running[0m
+
+[1;36mÔöüÔöüÔöü 1. AUTHENTICATION ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 2. SWAGGER DOCS ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 3. CATEGORIES ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 4. WAREHOUSES ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 5. PRODUCTS ÔöüÔöüÔöü[0m
+  ÔÜá Skipped (no category/warehouse)
+
+[1;36mÔöüÔöüÔöü 6. MOUVEMENTS ÔöüÔöüÔöü[0m
+  ÔÜá Skipped (no product)
+
+[1;36mÔöüÔöüÔöü 7. COMMANDS ÔöüÔöüÔöü[0m
+  ÔÜá Skipped (no product)
+
+[1;36mÔöüÔöüÔöü 8. SUPPLIERS ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 9. ALERTS ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 10. ARCHIVES ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 11. ADMIN ÔöüÔöüÔöü[0m
+
+[1;36mÔöüÔöüÔöü 12. CLEANUP ÔöüÔöüÔöü[0m
+
+
+[1;35mÔòöÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòù[0m
+[1;35mÔòæ                         TEST RESULTS                                Ôòæ[0m
+[1;35mÔòÜÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòØ[0m
+
+  TEST                                METHOD   EXPECT GOT    STATUS
+  ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  Register Admin                      POST     201    [32m201   [0m [32mÔ£ô PASS[0m
+  Register Magasinier                 POST     201    [32m201   [0m [32mÔ£ô PASS[0m
+  Login                               POST     200    [32m200   [0m [32mÔ£ô PASS[0m
+  Login Bad Credentials               POST     401    [32m401   [0m [32mÔ£ô PASS[0m
+  Get Profile                         GET      200    [32m200   [0m [32mÔ£ô PASS[0m
+  Update Profile                      PUT      200    [32m200   [0m [32mÔ£ô PASS[0m
+  Swagger JSON                        GET      200    [32m200   [0m [32mÔ£ô PASS[0m
+  Swagger UI                          GET      200    [32m200   [0m [32mÔ£ô PASS[0m
+  Create Category                     POST     201    [31m403   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {"error":"Forbidden. Only Magasiniers can access this resource."}[0m
+  Create Warehouse                    POST     201    [31m403   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {"error":"Forbidden. Only Magasiniers can access this resource."}[0m
+  Create Supplier                     POST     201    [31m500   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {
+    "message": "SQLSTATE[42S02]: Base table or view not found: 1146 Table 'smartstock.su[0m
+  List Alerts                         GET      200    [31m404   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {
+    "message": "The route api/alerts could not be found.",
+    "exception": "Symfony\\Co[0m
+  List Alerts (filter)                GET      200    [31m404   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {
+    "message": "The route api/alerts could not be found.",
+    "exception": "Symfony\\Co[0m
+  Active Alerts Count                 GET      200    [31m404   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {
+    "message": "The route api/alerts/active/count could not be found.",
+    "exception":[0m
+  Low Stock Alerts                    GET      200    [31m404   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {
+    "message": "The route api/alerts/low-stock/list could not be found.",
+    "exception[0m
+  Admin Dashboard                     GET      200    [31m403   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {"error":"Unauthorized access. Admins only."}[0m
+  List Users (Admin)                  GET      200    [31m403   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {"error":"Unauthorized access. Admins only."}[0m
+  Create User (Admin)                 POST     201    [31m403   [0m [31mÔ£û FAIL[0m
+    [33mÔå│ {"error":"Unauthorized access. Admins only."}[0m
+  Logout                              POST     200    [32m200   [0m [32mÔ£ô PASS[0m
+
+  ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  [1mTotal: 19  |  [32mPassed: 9[0m  |  [31mFailed: 10[0m  |  Score: 47%
+
+  [1;33mÔÜá Some tests failed. Check the details above.[0m
+  [33m  Note: Admin/Magasinier routes may fail if user role is 'client'.[0m
+  [33m  Run: UPDATE users SET role='admin' WHERE id=<your_id>;[0m
+
