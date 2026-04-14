@@ -361,29 +361,43 @@
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
     <script>
-        SwaggerUIBundle({
-            url: "/api/documentation",
-            dom_id: '#swagger-ui',
-            deepLinking: true,
-            presets: [
-                SwaggerUIBundle.presets.apis,
-                SwaggerUIStandalonePreset
-            ],
-            plugins: [
-                SwaggerUIBundle.plugins.DownloadUrl
-            ],
-            layout: "StandaloneLayout",
-            docExpansion: "list",
-            filter: true,
-            tryItOutEnabled: true,
-            defaultModelsExpandDepth: 1,
-            defaultModelExpandDepth: 2,
-            persistAuthorization: true,
-            syntaxHighlight: {
-                activated: true,
-                theme: "monokai"
-            }
-        });
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: "/api/documentation",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                docExpansion: "list",
+                filter: true,
+                tryItOutEnabled: true,
+                defaultModelsExpandDepth: 1,
+                defaultModelExpandDepth: 2,
+                persistAuthorization: true,
+                showRequestHeaders: true,
+                supportedSubmitMethods: [
+                    'get',
+                    'post',
+                    'put',
+                    'delete',
+                    'patch',
+                    'options',
+                    'head'
+                ],
+                syntaxHighlight: {
+                    activated: true,
+                    theme: "monokai"
+                }
+            });
+
+            window.ui = ui;
+        }
     </script>
 </body>
 </html>
