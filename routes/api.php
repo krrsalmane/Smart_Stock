@@ -79,22 +79,27 @@ Route::middleware('jwt')->group(function () {
         Route::post('/warehouses', [WarehouseController::class, 'store']);
         Route::get('/warehouses/{id}', [WarehouseController::class, 'show']);
         Route::put('/warehouses/{id}', [WarehouseController::class, 'update']);
-        
-       // Route::post('/mouvements', [MouvementController::class, 'store']);
 
-        
+        // Mouvements
         Route::get('/mouvements', [MouvementController::class, 'index']);
         Route::post('/mouvements', [MouvementController::class, 'store']);
         Route::get('/mouvements/{id}', [MouvementController::class, 'show']);
         Route::put('/mouvements/{id}', [MouvementController::class, 'update']);
+
+        // Products
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     });
 
     /*
     |-- Admin Specific Routes --|
     */
     Route::middleware('admin')->group(function () {
-        // Route::get('/admin/dashboard', [AdminController::class, 'index']);
-        // Route::apiResource('/users', UserController::class);
+        Route::get('/admin/dashboard', [AdminController::class, 'index']);
+        Route::apiResource('/users', UserController::class);
     });
 
     Route::middleware(['jwt', 'magasinier'])->group(function () {

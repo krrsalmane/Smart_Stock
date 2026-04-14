@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mouvement;
+use App\Models\Product;
+use App\Services\AlertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -33,9 +35,32 @@ class MouvementController extends Controller
 
         $mouvement = Mouvement::create($request->all());
 
+        // Update product quantity based on movement type
+        $product = Product::findOrFail($request->product_id);
+        
+        if ($request->type === 'IN') {
+            $product->increment('quantity', $request->quantity);
+        } elseif ($request->type === 'OUT') {
+            $product->decrement('quantity', $request->quantity);
+        } elseif ($request->type === 'ADJ') {
+            // For adjustment, set the quantity directly if provided
+            if ($request->has('new_quantity')) {
+                $product->quantity = $request->new_quantity;
+                $product->save();
+            }
+            AlertService::createAdjustmentAlert($product);
+        }
+
+        // Refresh product data
+        $product->refresh();
+
+        // Check stock levels and trigger alerts
+        AlertService::checkStockLevels($product);
+
         return response()->json([
             'message' => 'Mouvement recorded successfully',
-            'mouvement' => $mouvement->load(['product', 'command', 'user'])
+            'mouvement' => $mouvement->load(['product', 'command', 'user']),
+            'product' => $product
         ], 201);
     }
 
@@ -78,3 +103,4 @@ class MouvementController extends Controller
         ]);
     }
 }
+

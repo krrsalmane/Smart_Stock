@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('alerts', function (Blueprint $table) {
          $table->id();
-         $table->string('status'); // e.g., 'active', 'dismissed'
+         $table->enum('status', ['active', 'dismissed', 'resolved'])->default('active'); 
          $table->timestamp('triggered_at');
          $table->enum('type', ['LOW_STOCK', 'DISCREPANCY', 'ADJUSTMENT']);
     

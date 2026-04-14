@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\AlertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
     
-        public function index()
+    public function index()
     {
         $products = Product::with(['category', 'warehouse'])->get();
         return response()->json($products);
@@ -35,6 +36,9 @@ class ProductController extends Controller
 
         // 2. Create the Product record
         $product = Product::create($request->all());
+
+        // 3. Check stock levels and create alerts if needed
+        AlertService::checkStockLevels($product);
 
         return response()->json([
             'message' => 'Product added to inventory successfully',
@@ -110,4 +114,35 @@ class ProductController extends Controller
     }
 
 
+        // Update only provided fields
+        $product->update($request->all());
+
+        // Check stock levels and update alerts if needed
+        AlertService::checkStockLevels($product);
+
+        return response()->json([
+            'message' => 'Product updated successfully',
+            'product' => $product->load(['category', 'warehouse'])
+        ], 200);
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Product not found'
+            ], 404);
+        }
+
+        // Dismiss all alerts for this product before deletion
+        AlertService::dismissProductAlerts($product);
+
+        $product->delete();
+
+        return response()->json([
+            'message' => 'Product deleted successfully'
+        ], 200);
+    }
 }
