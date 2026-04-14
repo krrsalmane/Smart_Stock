@@ -13,8 +13,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CommandController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\AlertController;
-use App\Http\Controllers\ArchiveController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +28,7 @@ Route::get('/docs', function () {
     return view('swagger-ui');
 })->name('swagger.ui');
 
-// Authentication
+// Route::get('/', [PublicController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -65,23 +63,10 @@ Route::middleware('jwt')->group(function () {
     Route::post('/suppliers/{id}/commands', [SupplierController::class, 'attachCommand']);
     Route::delete('/suppliers/{id}/commands/{commandId}', [SupplierController::class, 'detachCommand']);
 
-    // Alert Routes (accessible to authenticated users)
-    Route::get('/alerts', [AlertController::class, 'index']);
-    Route::get('/alerts/{id}', [AlertController::class, 'show']);
-    Route::put('/alerts/{id}', [AlertController::class, 'update']);
-    Route::delete('/alerts/{id}', [AlertController::class, 'destroy']);
-    Route::get('/alerts/active/count', [AlertController::class, 'getActiveCount']);
-    Route::get('/alerts/low-stock/list', [AlertController::class, 'getLowStockAlerts']);
-
     /*
     |-- Magasinier Specific Routes --|
     */
     Route::middleware('magasinier')->group(function () {
-        // Archives
-        Route::get('/archives', [ArchiveController::class, 'index']);
-        Route::get('/archives/{id}', [ArchiveController::class, 'show']);
-        Route::post('/archives', [ArchiveController::class, 'store']);
-
         // Categories
         Route::get('/categories', [CategoryController::class, 'index']);
         Route::post('/categories', [CategoryController::class, 'store']);
@@ -115,5 +100,13 @@ Route::middleware('jwt')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'index']);
         Route::apiResource('/users', UserController::class);
+    });
+
+    Route::middleware(['jwt', 'magasinier'])->group(function () {
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::get('/products/{id}', [ProductController::class, 'show']);
+        Route::put('/products/{id}', [ProductController::class, 'update']);
+        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     });
 });
