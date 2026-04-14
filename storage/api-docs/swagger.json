@@ -1,36 +1,40 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.0",
   "info": {
     "title": "SmartStock API",
-    "description": "Complete REST API for SmartStock — an intelligent warehouse & inventory management system. Supports JWT authentication, role-based access control (admin, magasinier, client, supplier), product tracking, stock movements, alerts, and order management.",
+    "description": "Warehouse Management System API with role-based access control",
     "version": "1.0.0",
     "contact": {
-      "name": "SmartStock Team"
+      "name": "SmartStock Dev Team"
     }
   },
   "servers": [
     {
       "url": "http://localhost:8000/api",
-      "description": "Local Development Server"
+      "description": "Development Server"
+    },
+    {
+      "url": "https://api.smartstock.com/api",
+      "description": "Production Server"
     }
   ],
   "components": {
     "securitySchemes": {
-      "bearerAuth": {
+      "Bearer": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Enter your JWT token obtained from /login"
+        "description": "JWT Authorization header using Bearer scheme"
       }
     },
     "schemas": {
       "User": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "name": { "type": "string", "example": "John Doe" },
-          "email": { "type": "string", "format": "email", "example": "john@example.com" },
-          "role": { "type": "string", "enum": ["admin", "magasinier", "client", "Supplier"], "example": "magasinier" },
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "type": "string", "enum": ["admin", "magasinier", "client", "Supplier"] },
           "created_at": { "type": "string", "format": "date-time" },
           "updated_at": { "type": "string", "format": "date-time" }
         }
@@ -38,34 +42,14 @@
       "Product": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "name": { "type": "string", "example": "Laptop Dell XPS 15" },
-          "sku": { "type": "string", "example": "DELL-XPS-15-001" },
-          "quantity": { "type": "integer", "example": 50 },
-          "price": { "type": "number", "format": "double", "example": 1299.99 },
-          "alert_threshold": { "type": "integer", "example": 10 },
-          "category_id": { "type": "integer", "example": 1 },
-          "warehouse_id": { "type": "integer", "example": 1 },
-          "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
-        }
-      },
-      "Category": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "name": { "type": "string", "example": "Electronics" },
-          "description": { "type": "string", "example": "Electronic devices and accessories" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
-        }
-      },
-      "Warehouse": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "name": { "type": "string", "example": "Main Warehouse" },
-          "address": { "type": "string", "example": "123 Industrial Ave, Casablanca" },
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "sku": { "type": "string" },
+          "quantity": { "type": "integer" },
+          "price": { "type": "number" },
+          "alert_threshold": { "type": "integer" },
+          "category_id": { "type": "integer" },
+          "warehouse_id": { "type": "integer" },
           "created_at": { "type": "string", "format": "date-time" },
           "updated_at": { "type": "string", "format": "date-time" }
         }
@@ -73,39 +57,11 @@
       "Command": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "status": { "type": "string", "enum": ["pending", "approved", "received", "cancelled"], "example": "pending" },
-          "ordered_at": { "type": "string", "format": "date", "example": "2026-04-14" },
-          "expected_at": { "type": "string", "format": "date", "nullable": true },
-          "total_cost": { "type": "number", "format": "double", "example": 5499.95 },
-          "command_type": { "type": "string", "nullable": true },
-          "client_id": { "type": "integer", "example": 1 },
-          "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
-        }
-      },
-      "Mouvement": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "type": { "type": "string", "enum": ["IN", "OUT", "ADJ"], "example": "IN" },
-          "quantity": { "type": "integer", "example": 25 },
-          "note": { "type": "string", "nullable": true, "example": "Received from supplier" },
-          "product_id": { "type": "integer", "example": 1 },
-          "command_id": { "type": "integer", "nullable": true },
-          "user_id": { "type": "integer", "example": 1 },
-          "created_at": { "type": "string", "format": "date-time" },
-          "updated_at": { "type": "string", "format": "date-time" }
-        }
-      },
-      "Alert": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "status": { "type": "string", "enum": ["active", "dismissed", "resolved"], "example": "active" },
-          "triggered_at": { "type": "string", "format": "date-time" },
-          "type": { "type": "string", "enum": ["LOW_STOCK", "DISCREPANCY", "ADJUSTMENT"], "example": "LOW_STOCK" },
-          "product_id": { "type": "integer", "example": 1 },
+          "id": { "type": "integer" },
+          "status": { "type": "string", "enum": ["pending", "approved", "received", "cancelled"] },
+          "ordered_at": { "type": "string", "format": "date" },
+          "total_cost": { "type": "number" },
+          "client_id": { "type": "integer" },
           "created_at": { "type": "string", "format": "date-time" },
           "updated_at": { "type": "string", "format": "date-time" }
         }
@@ -113,11 +69,58 @@
       "Supplier": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "name": { "type": "string", "example": "Tech Supplies Inc." },
-          "email": { "type": "string", "format": "email", "example": "contact@techsupplies.com" },
-          "phone": { "type": "string", "example": "+212600000000" },
-          "address": { "type": "string", "example": "456 Commerce St, Rabat" },
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "address": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Warehouse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "address": { "type": "string" },
+          "user_id": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Mouvement": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "type": { "type": "string", "enum": ["IN", "OUT", "ADJ"] },
+          "quantity": { "type": "integer" },
+          "note": { "type": "string" },
+          "product_id": { "type": "integer" },
+          "command_id": { "type": "integer" },
+          "user_id": { "type": "integer" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Alert": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "status": { "type": "string" },
+          "triggered_at": { "type": "string", "format": "date-time" },
+          "type": { "type": "string", "enum": ["LOW_STOCK", "DISCREPANCY", "ADJUSTMENT"] },
+          "product_id": { "type": "integer" },
           "created_at": { "type": "string", "format": "date-time" },
           "updated_at": { "type": "string", "format": "date-time" }
         }
@@ -125,85 +128,61 @@
       "Archive": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "example": 1 },
-          "quantity": { "type": "integer", "example": 100 },
-          "product_id": { "type": "integer", "example": 1 },
-          "user_id": { "type": "integer", "example": 1 },
+          "id": { "type": "integer" },
+          "product_id": { "type": "integer" },
+          "quantity": { "type": "integer" },
+          "user_id": { "type": "integer" },
           "created_at": { "type": "string", "format": "date-time" }
         }
       },
-      "ValidationError": {
+      "Error": {
         "type": "object",
-        "additionalProperties": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "example": {
-          "email": ["The email field is required."],
-          "password": ["The password must be at least 6 characters."]
+        "properties": {
+          "message": { "type": "string" },
+          "error": { "type": "string" }
         }
       }
     }
   },
-  "tags": [
-    { "name": "Authentication", "description": "Register, login, logout, and profile management" },
-    { "name": "Products", "description": "Inventory product management (Magasinier)" },
-    { "name": "Categories", "description": "Product category management (Magasinier)" },
-    { "name": "Warehouses", "description": "Warehouse management (Magasinier)" },
-    { "name": "Mouvements", "description": "Stock movement tracking (Magasinier)" },
-    { "name": "Commands", "description": "Order/command management (Authenticated users)" },
-    { "name": "Suppliers", "description": "Supplier management and relationships (Authenticated users)" },
-    { "name": "Alerts", "description": "Stock alert monitoring (Authenticated users)" },
-    { "name": "Archives", "description": "Product snapshot archiving (Magasinier)" },
-    { "name": "Admin", "description": "Admin dashboard and user management (Admin only)" }
+  "security": [
+    {
+      "Bearer": []
+    }
   ],
   "paths": {
     "/register": {
       "post": {
         "tags": ["Authentication"],
-        "summary": "Register a new user",
-        "description": "Creates a new user account with the role 'client' and returns a JWT token.",
+        "summary": "Register new user",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name", "email", "password", "password_confirmation"],
+                "required": ["name", "email", "password", "role"],
                 "properties": {
-                  "name": { "type": "string", "example": "John Doe" },
-                  "email": { "type": "string", "format": "email", "example": "john@example.com" },
-                  "password": { "type": "string", "minLength": 6, "example": "password123" },
-                  "password_confirmation": { "type": "string", "example": "password123" }
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" },
+                  "role": { "type": "string", "enum": ["admin", "magasinier", "client"] }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "User registered successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": { "type": "string" },
-                    "user": { "$ref": "#/components/schemas/User" }
-                  }
-                }
-              }
-            }
-          },
-          "422": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } } }
+          "201": { "description": "User registered successfully" },
+          "422": { "description": "Validation error" }
         }
       }
     },
     "/login": {
       "post": {
         "tags": ["Authentication"],
-        "summary": "Login",
-        "description": "Authenticates user credentials and returns a JWT token.",
+        "summary": "Login user",
+        "security": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -212,31 +191,16 @@
                 "type": "object",
                 "required": ["email", "password"],
                 "properties": {
-                  "email": { "type": "string", "format": "email", "example": "john@example.com" },
-                  "password": { "type": "string", "example": "password123" }
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
                 }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Login successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": { "type": "string" },
-                    "user": { "$ref": "#/components/schemas/User" },
-                    "expires_in": { "type": "integer", "example": 3600 }
-                  }
-                }
-              }
-            }
-          },
-          "401": { "description": "Invalid credentials" },
-          "500": { "description": "Could not create token" }
+          "200": { "description": "Login successful" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
@@ -245,7 +209,7 @@
         "tags": ["Authentication"],
         "summary": "Logout",
         "description": "Invalidates the current JWT token.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": { "description": "Successfully logged out" },
           "500": { "description": "Failed to logout" }
@@ -256,17 +220,25 @@
       "get": {
         "tags": ["Authentication"],
         "summary": "Get current user profile",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
-          "200": { "description": "User profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "200": {
+            "description": "User profile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
           "404": { "description": "User not found" }
         }
       },
       "put": {
         "tags": ["Authentication"],
         "summary": "Update current user profile",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -280,7 +252,14 @@
           }
         },
         "responses": {
-          "200": { "description": "User updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
           "500": { "description": "Failed to update user" }
         }
       }
@@ -290,16 +269,23 @@
         "tags": ["Products"],
         "summary": "List all products",
         "description": "Returns all products with their category and warehouse. Requires magasinier role.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
-          "200": { "description": "List of products", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Product" } } } } }
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Product" } }
+              }
+            }
+          }
         }
       },
       "post": {
         "tags": ["Products"],
         "summary": "Create a new product",
         "description": "Adds a product to the inventory. Automatically triggers low-stock alert check.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -331,7 +317,7 @@
         "tags": ["Products"],
         "summary": "Get product details",
         "description": "Returns a product with its category, warehouse, alerts, commands, and movements.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Product details" },
@@ -341,7 +327,7 @@
       "put": {
         "tags": ["Products"],
         "summary": "Update a product",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -371,7 +357,7 @@
         "tags": ["Products"],
         "summary": "Delete a product",
         "description": "Deletes the product and dismisses all its active alerts.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Product deleted successfully" },
@@ -383,15 +369,22 @@
       "get": {
         "tags": ["Categories"],
         "summary": "List all categories",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
-          "200": { "description": "List of categories", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Category" } } } } }
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Category" } }
+              }
+            }
+          }
         }
       },
       "post": {
         "tags": ["Categories"],
         "summary": "Create a new category",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -417,7 +410,7 @@
       "get": {
         "tags": ["Categories"],
         "summary": "Get category details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Category details" },
@@ -427,7 +420,7 @@
       "put": {
         "tags": ["Categories"],
         "summary": "Update a category",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -450,7 +443,7 @@
       "delete": {
         "tags": ["Categories"],
         "summary": "Delete a category",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Category deleted" },
@@ -463,7 +456,7 @@
         "tags": ["Warehouses"],
         "summary": "List all warehouses",
         "description": "Returns all warehouses with their products.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": { "description": "List of warehouses" }
         }
@@ -471,7 +464,7 @@
       "post": {
         "tags": ["Warehouses"],
         "summary": "Create a new warehouse",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -497,7 +490,7 @@
       "get": {
         "tags": ["Warehouses"],
         "summary": "Get warehouse details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Warehouse details" },
@@ -507,7 +500,7 @@
       "put": {
         "tags": ["Warehouses"],
         "summary": "Update a warehouse",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -533,7 +526,7 @@
         "tags": ["Mouvements"],
         "summary": "List all stock movements",
         "description": "Returns all movements with product, command, and user details.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": { "description": "List of movements" }
         }
@@ -542,7 +535,7 @@
         "tags": ["Mouvements"],
         "summary": "Record a new stock movement",
         "description": "Creates a movement (IN/OUT/ADJ), updates product quantity, and triggers alert checks. ADJ type supports setting a new_quantity directly.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -573,7 +566,7 @@
       "get": {
         "tags": ["Mouvements"],
         "summary": "Get movement details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Movement details" },
@@ -583,7 +576,7 @@
       "put": {
         "tags": ["Mouvements"],
         "summary": "Update a movement",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -610,7 +603,7 @@
         "tags": ["Commands"],
         "summary": "List all commands/orders",
         "description": "Returns all commands with client and product details.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": { "description": "List of commands" }
         }
@@ -619,7 +612,7 @@
         "tags": ["Commands"],
         "summary": "Create a new command/order",
         "description": "Creates a command with attached products. Total cost is auto-calculated.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -657,7 +650,7 @@
       "get": {
         "tags": ["Commands"],
         "summary": "Get command details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "responses": {
           "200": { "description": "Command details" },
@@ -667,7 +660,7 @@
       "put": {
         "tags": ["Commands"],
         "summary": "Update command status",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -691,13 +684,15 @@
       "get": {
         "tags": ["Suppliers"],
         "summary": "List all suppliers",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "List of suppliers" } }
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": { "description": "List of suppliers" }
+        }
       },
       "post": {
         "tags": ["Suppliers"],
         "summary": "Create a new supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -725,14 +720,17 @@
       "get": {
         "tags": ["Suppliers"],
         "summary": "Get supplier details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Supplier details" }, "404": { "description": "Supplier not found" } }
+        "responses": {
+          "200": { "description": "Supplier details" },
+          "404": { "description": "Supplier not found" }
+        }
       },
       "put": {
         "tags": ["Suppliers"],
         "summary": "Update a supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -749,21 +747,27 @@
             }
           }
         },
-        "responses": { "200": { "description": "Supplier updated" }, "404": { "description": "Supplier not found" } }
+        "responses": {
+          "200": { "description": "Supplier updated" },
+          "404": { "description": "Supplier not found" }
+        }
       },
       "delete": {
         "tags": ["Suppliers"],
         "summary": "Delete a supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Supplier deleted" }, "404": { "description": "Supplier not found" } }
+        "responses": {
+          "200": { "description": "Supplier deleted" },
+          "404": { "description": "Supplier not found" }
+        }
       }
     },
     "/suppliers/{id}/products": {
       "post": {
         "tags": ["Suppliers"],
         "summary": "Attach a product to a supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Supplier ID" }],
         "requestBody": {
           "required": true,
@@ -779,26 +783,32 @@
             }
           }
         },
-        "responses": { "200": { "description": "Product attached" }, "404": { "description": "Supplier not found" } }
+        "responses": {
+          "200": { "description": "Product attached" },
+          "404": { "description": "Supplier not found" }
+        }
       }
     },
     "/suppliers/{id}/products/{productId}": {
       "delete": {
         "tags": ["Suppliers"],
         "summary": "Detach a product from a supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Supplier ID" },
           { "name": "productId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Product ID" }
         ],
-        "responses": { "200": { "description": "Product detached" }, "404": { "description": "Not found" } }
+        "responses": {
+          "200": { "description": "Product detached" },
+          "404": { "description": "Not found" }
+        }
       }
     },
     "/suppliers/{id}/commands": {
       "post": {
         "tags": ["Suppliers"],
         "summary": "Attach a command to a supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Supplier ID" }],
         "requestBody": {
           "required": true,
@@ -814,19 +824,25 @@
             }
           }
         },
-        "responses": { "200": { "description": "Command attached" }, "404": { "description": "Supplier not found" } }
+        "responses": {
+          "200": { "description": "Command attached" },
+          "404": { "description": "Supplier not found" }
+        }
       }
     },
     "/suppliers/{id}/commands/{commandId}": {
       "delete": {
         "tags": ["Suppliers"],
         "summary": "Detach a command from a supplier",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Supplier ID" },
           { "name": "commandId", "in": "path", "required": true, "schema": { "type": "integer" }, "description": "Command ID" }
         ],
-        "responses": { "200": { "description": "Command detached" }, "404": { "description": "Not found" } }
+        "responses": {
+          "200": { "description": "Command detached" },
+          "404": { "description": "Not found" }
+        }
       }
     },
     "/alerts": {
@@ -834,7 +850,7 @@
         "tags": ["Alerts"],
         "summary": "List all alerts",
         "description": "Returns alerts with optional filtering by status, type, or product_id.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [
           { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["active", "dismissed", "resolved"] }, "description": "Filter by alert status" },
           { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["LOW_STOCK", "DISCREPANCY", "ADJUSTMENT"] }, "description": "Filter by alert type" },
@@ -863,14 +879,17 @@
       "get": {
         "tags": ["Alerts"],
         "summary": "Get alert details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Alert details" }, "404": { "description": "Alert not found" } }
+        "responses": {
+          "200": { "description": "Alert details" },
+          "404": { "description": "Alert not found" }
+        }
       },
       "put": {
         "tags": ["Alerts"],
         "summary": "Update alert status (dismiss/resolve)",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "required": true,
@@ -886,21 +905,28 @@
             }
           }
         },
-        "responses": { "200": { "description": "Alert updated" }, "404": { "description": "Alert not found" }, "422": { "description": "Validation error" } }
+        "responses": {
+          "200": { "description": "Alert updated" },
+          "404": { "description": "Alert not found" },
+          "422": { "description": "Validation error" }
+        }
       },
       "delete": {
         "tags": ["Alerts"],
         "summary": "Delete an alert",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Alert deleted" }, "404": { "description": "Alert not found" } }
+        "responses": {
+          "200": { "description": "Alert deleted" },
+          "404": { "description": "Alert not found" }
+        }
       }
     },
     "/alerts/active/count": {
       "get": {
         "tags": ["Alerts"],
         "summary": "Get active alerts count",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": {
             "description": "Active alerts count",
@@ -908,7 +934,9 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": { "active_alerts": { "type": "integer", "example": 5 } }
+                  "properties": {
+                    "active_alerts": { "type": "integer", "example": 5 }
+                  }
                 }
               }
             }
@@ -921,7 +949,7 @@
         "tags": ["Alerts"],
         "summary": "Get low stock alerts",
         "description": "Returns only active LOW_STOCK type alerts with product details.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": {
             "description": "Low stock alerts",
@@ -946,7 +974,7 @@
         "tags": ["Archives"],
         "summary": "List archived records",
         "description": "Returns archived product snapshots. Filterable by user_id, product_id, and date.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [
           { "name": "user_id", "in": "query", "schema": { "type": "integer" }, "description": "Filter by user" },
           { "name": "product_id", "in": "query", "schema": { "type": "integer" }, "description": "Filter by product" },
@@ -973,7 +1001,7 @@
       "post": {
         "tags": ["Archives"],
         "summary": "Create a product snapshot archive",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -999,9 +1027,12 @@
       "get": {
         "tags": ["Archives"],
         "summary": "Get archive details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Archive details" }, "404": { "description": "Archive not found" } }
+        "responses": {
+          "200": { "description": "Archive details" },
+          "404": { "description": "Archive not found" }
+        }
       }
     },
     "/admin/dashboard": {
@@ -1009,7 +1040,7 @@
         "tags": ["Admin"],
         "summary": "Admin dashboard statistics",
         "description": "Returns total inventory value, pending commands count, alert counts, and recent movements. Admin role required.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "responses": {
           "200": {
             "description": "Dashboard statistics",
@@ -1042,14 +1073,16 @@
         "tags": ["Admin"],
         "summary": "List all users",
         "description": "Admin only. Returns all users in the system.",
-        "security": [{ "bearerAuth": [] }],
-        "responses": { "200": { "description": "Users list" } }
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": { "description": "Users list" }
+        }
       },
       "post": {
         "tags": ["Admin"],
         "summary": "Create a new user",
         "description": "Admin only. Create a user with a specific role.",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "requestBody": {
           "required": true,
           "content": {
@@ -1077,14 +1110,17 @@
       "get": {
         "tags": ["Admin"],
         "summary": "Get user details",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "User details" }, "404": { "description": "User not found" } }
+        "responses": {
+          "200": { "description": "User details" },
+          "404": { "description": "User not found" }
+        }
       },
       "put": {
         "tags": ["Admin"],
         "summary": "Update a user",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
         "requestBody": {
           "content": {
@@ -1101,14 +1137,20 @@
             }
           }
         },
-        "responses": { "200": { "description": "User updated" }, "404": { "description": "User not found" } }
+        "responses": {
+          "200": { "description": "User updated" },
+          "404": { "description": "User not found" }
+        }
       },
       "delete": {
         "tags": ["Admin"],
         "summary": "Delete a user",
-        "security": [{ "bearerAuth": [] }],
+        "security": [{ "Bearer": [] }],
         "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "User deleted" }, "404": { "description": "User not found" } }
+        "responses": {
+          "200": { "description": "User deleted" },
+          "404": { "description": "User not found" }
+        }
       }
     }
   }
