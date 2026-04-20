@@ -212,19 +212,19 @@
                 const result = await response.json();
 
                 if (response.ok && result.token) {
-                    // Success! Save the token
-                    localStorage.setItem('smartstock_token', result.token);
-                    
-                    // Show success message
-                    successBox.innerText = 'Account created successfully! Redirecting...';
+                    // Success! Show success message and redirect to login
+                    successBox.innerText = 'Account created successfully! Redirecting to login...';
                     successBox.classList.remove('hidden');
                     btnText.innerText = 'Success!';
                     btnSpinner.classList.remove('animate-spin');
                     btnSpinner.className = 'ph ph-check-circle text-xl ml-2 text-white';
                     
+                    // Clear the form
+                    document.getElementById('registerForm').reset();
+                    
                     setTimeout(() => {
-                        window.location.href = '/dashboard';
-                    }, 1000);
+                        window.location.href = '/login';
+                    }, 1500);
 
                 } else {
                     // Failed registration - show validation errors
