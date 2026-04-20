@@ -16,8 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'jwt' => JwtMiddleware::class,
-             'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        'magasinier' => \App\Http\Middleware\MagasinierMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'magasinier' => \App\Http\Middleware\MagasinierMiddleware::class,
+            'supplier' => \App\Http\Middleware\SupplierMiddleware::class,
         ]);
         //
     })

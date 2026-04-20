@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CategoryController extends Controller
 {
@@ -15,10 +17,7 @@ class CategoryController extends Controller
     {
         $categories = Category::with('products')->get();
 
-        return response()->json([
-            'message' => 'Categories retrieved successfully',
-            'categories' => $categories
-        ]);
+        return response()->json($categories);
     }
 
     /**
@@ -26,21 +25,35 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        Log::info('Category creation attempt', $request->all());
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'sometimes|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            Log::error('Category validation failed', $validator->errors()->toArray());
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        $category = Category::create($request->all());
+        try {
+            $category = Category::create($request->all());
+            Log::info('Category created successfully', ['id' => $category->id]);
 
-        return response()->json([
-            'message' => 'Category created successfully',
-            'category' => $category->load('products')
-        ], 201);
+            return response()->json([
+                'message' => 'Category created successfully',
+                'category' => $category
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Category creation failed', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'Failed to create category: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -55,7 +68,7 @@ class CategoryController extends Controller
                 'message' => 'Category retrieved successfully',
                 'category' => $category
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Category not found'
             ], 404);
@@ -67,9 +80,8 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $category = Category::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $category = Category::find($id);
+        if (!$category) {
             return response()->json([
                 'message' => 'Category not found'
             ], 404);
@@ -97,9 +109,8 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            $category = Category::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $category = Category::find($id);
+        if (!$category) {
             return response()->json([
                 'message' => 'Category not found'
             ], 404);

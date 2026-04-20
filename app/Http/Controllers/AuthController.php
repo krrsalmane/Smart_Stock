@@ -23,7 +23,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'client',
+            'role' => 'client', // Default role for new registrations
         ]);
 
         try {
@@ -33,6 +33,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
+            'message' => 'User registered successfully',
             'token' => $token,
             'user' => $user,
         ], 201);
@@ -70,25 +71,17 @@ class AuthController extends Controller
 
     public function getUser()
     {
-        try {
-            $user = Auth::user();
-            if (!$user) {
-                return response()->json(['error' => 'User not found'], 404);
-            }
-            return response()->json($user);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Failed to fetch user profile'], 500);
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
         }
+        return response()->json($user);
     }
 
     public function updateUser(Request $request)
     {
-        try {
-            $user = Auth::user();
-            $user->update($request->only(['name', 'email']));
-            return response()->json($user);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Failed to update user'], 500);
-        }
+        $user = Auth::user();
+        $user->update($request->only(['name', 'email']));
+        return response()->json($user);
     }
 }

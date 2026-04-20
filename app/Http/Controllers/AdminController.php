@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Command;
 use App\Models\Mouvement;
 use App\Services\AlertService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -17,7 +18,7 @@ class AdminController extends Controller
     {
         // 1. Total inventory value
         // Assuming price is stored in product table
-        $totalInventoryValue = Product::sum(\DB::raw('price * quantity'));
+        $totalInventoryValue = Product::sum(DB::raw('price * quantity'));
 
         // 2. Pending commands count
         $pendingCommands = Command::where('status', 'pending')->count();

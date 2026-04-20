@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Alert extends Model
 {
@@ -22,6 +23,6 @@ class Alert extends Model
     public function notifyAdmin()
     {
         // Simple log for now, can be expanded to email/notification later
-        \Illuminate\Support\Facades\Log::info("Admin notified for Alert ID: " . $this->id);
+        Log::info("Admin notified for Alert ID: " . $this->id);
     }
 }

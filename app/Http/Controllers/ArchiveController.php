@@ -6,6 +6,7 @@ use App\Models\Archive;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ArchiveController extends Controller
 {
@@ -50,7 +51,7 @@ class ArchiveController extends Controller
                 'message' => 'Archive detail retrieved',
                 'archive' => $archive
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Archive not found'], 404);
         }
     }

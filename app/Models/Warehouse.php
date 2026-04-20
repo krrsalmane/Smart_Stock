@@ -6,21 +6,56 @@ use Illuminate\Database\Eloquent\Model;
 
 class Warehouse extends Model
 {
-    protected $fillable = ['name', 'address', 'user_id'];
+    protected $fillable = ['name', 'address', 'capacity', 'user_id'];
 
-    // According to your diagram, a warehouse "contains" products
+    protected $table = 'warehouses';
+
+    /**
+     * A warehouse contains many products.
+     */
     public function products()
     {
         return $this->hasMany(Product::class);
     }
-    
-    // It also has a Magasinier who "runs" it
+
+    /**
+     * A warehouse is managed by a Magasinier user.
+     */
     public function magasinier()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    protected $table = 'warehouses'; // Explicitly naming it to avoid 'warhouses' typos
-    
-    
+    /**
+     * FS4 / Class Diagram: isFull()
+     * Returns true if the total product quantity meets or exceeds capacity.
+     * Returns false if no capacity is defined (unlimited).
+     */
+    public function isFull(): bool
+    {
+        if (is_null($this->capacity) || $this->capacity <= 0) {
+            return false; // No capacity limit set
+        }
+        $totalStock = $this->products()->sum('quantity');
+        return $totalStock >= $this->capacity;
+    }
+
+    /**
+     * Returns the current total stock count in the warehouse.
+     */
+    public function currentStock(): int
+    {
+        return (int) $this->products()->sum('quantity');
+    }
+
+    /**
+     * Returns usage percentage (0-100).
+     */
+    public function usagePercent(): float
+    {
+        if (is_null($this->capacity) || $this->capacity <= 0) {
+            return 0.0;
+        }
+        return min(100, round(($this->currentStock() / $this->capacity) * 100, 1));
+    }
 }

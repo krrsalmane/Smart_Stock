@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Services\AlertService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
 {
@@ -55,7 +56,7 @@ class ProductController extends Controller
                 'message' => 'Product retrieved successfully',
                 'product' => $product
             ], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Product not found'
             ], 404);
@@ -64,9 +65,8 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        try {
-            $product = Product::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $product = Product::find($id);
+        if (!$product) {
             return response()->json([
                 'message' => 'Product not found'
             ], 404);
@@ -101,9 +101,8 @@ class ProductController extends Controller
 
     public function destroy($id)
     {
-        try {
-            $product = Product::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $product = Product::find($id);
+        if (!$product) {
             return response()->json([
                 'message' => 'Product not found'
             ], 404);

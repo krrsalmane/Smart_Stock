@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class SupplierController extends Controller
 {
@@ -15,10 +16,7 @@ class SupplierController extends Controller
     {
         $suppliers = Supplier::with(['products', 'commands'])->get();
 
-        return response()->json([
-            'message' => 'Suppliers retrieved successfully',
-            'suppliers' => $suppliers
-        ]);
+        return response()->json($suppliers);
     }
 
     /**
@@ -57,7 +55,7 @@ class SupplierController extends Controller
                 'message' => 'Supplier retrieved successfully',
                 'supplier' => $supplier
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
@@ -69,9 +67,8 @@ class SupplierController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
@@ -101,9 +98,8 @@ class SupplierController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
@@ -117,13 +113,12 @@ class SupplierController extends Controller
     }
 
     /**
-     * Link a product to a supplier with cost price and lead time
+     * Assign products to a supplier
      */
-    public function attachProduct(Request $request, $id)
+    public function assignProducts(Request $request, $id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
@@ -139,7 +134,7 @@ class SupplierController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // Check if product is already attached
+        // Check if product is already assigned
         if ($supplier->products()->where('product_id', $request->product_id)->exists()) {
             return response()->json([
                 'message' => 'Product already associated with this supplier'
@@ -158,13 +153,12 @@ class SupplierController extends Controller
     }
 
     /**
-     * Link a command to a supplier
+     * Assign a command to a supplier
      */
-    public function attachCommand(Request $request, $id)
+    public function assignCommand(Request $request, $id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
@@ -181,7 +175,7 @@ class SupplierController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // Check if command is already attached
+        // Check if command is already assigned
         if ($supplier->commands()->where('command_id', $request->command_id)->exists()) {
             return response()->json([
                 'message' => 'Command already associated with this supplier'
@@ -201,54 +195,162 @@ class SupplierController extends Controller
     }
 
     /**
-     * Detach a product from a supplier
+     * Get commands assigned to a supplier
      */
-    public function detachProduct($id, $productId)
+    public function getCommands($id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
         }
 
-        if (!$supplier->products()->where('product_id', $productId)->exists()) {
-            return response()->json([
-                'message' => 'Product not associated with this supplier'
-            ], 404);
-        }
-
-        $supplier->products()->detach($productId);
+        $commands = $supplier->commands()->with('products')->get();
 
         return response()->json([
-            'message' => 'Product removed from supplier successfully'
+            'message' => 'Commands retrieved successfully',
+            'commands' => $commands
         ]);
     }
 
     /**
-     * Detach a command from a supplier
+     * Get products supplied by a supplier
      */
-    public function detachCommand($id, $commandId)
+    public function getProducts($id)
     {
-        try {
-            $supplier = Supplier::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
         }
 
-        if (!$supplier->commands()->where('command_id', $commandId)->exists()) {
+        $products = $supplier->products()->with('commands')->get();
+
+        return response()->json([
+            'message' => 'Products retrieved successfully',
+            'products' => $products
+        ]);
+    }
+
+    /**
+     * Update command status (for supplier portal)
+     */
+    public function updateCommandStatus(Request $request, $supplierId, $commandId)
+    {
+        $supplier = Supplier::find($supplierId);
+        if (!$supplier) {
             return response()->json([
-                'message' => 'Command not associated with this supplier'
+                'message' => 'Supplier not found'
             ], 404);
         }
 
-        $supplier->commands()->detach($commandId);
+        $validator = Validator::make($request->all(), [
+            'status' => 'sometimes|in:pending,confirmed,shipped,delivered,cancelled',
+            'delivered_at' => 'sometimes|date',
+            'shipped_at' => 'sometimes|date',
+            'notes' => 'sometimes|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Update the pivot table
+        $supplier->commands()->updateExistingPivot($commandId, $request->only(['status', 'delivered_at', 'shipped_at', 'notes']));
 
         return response()->json([
-            'message' => 'Command removed from supplier successfully'
+            'message' => 'Command status updated successfully'
+        ]);
+    }
+
+    /**
+     * Update command delivery info
+     */
+    public function updateCommandDelivery(Request $request, $supplierId, $commandId)
+    {
+        $supplier = Supplier::find($supplierId);
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'delivery_date' => 'required|date',
+            'tracking_number' => 'sometimes|string',
+            'notes' => 'sometimes|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Update pivot to show delivery sent
+        $updateData = [
+            'status' => 'shipped',
+            'shipped_at' => now(),
+            'expected_delivery' => $request->delivery_date,
+        ];
+
+        if ($request->has('tracking_number')) {
+            $updateData['tracking_number'] = $request->tracking_number;
+        }
+        if ($request->has('notes')) {
+            $updateData['notes'] = $request->notes;
+        }
+
+        $supplier->commands()->updateExistingPivot($commandId, $updateData);
+
+        return response()->json([
+            'message' => 'Delivery sent successfully'
+        ]);
+    }
+
+    /**
+     * Confirm command shipment
+     */
+    public function confirmShipment(Request $request, $supplierId, $commandId)
+    {
+        $supplier = Supplier::find($supplierId);
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        // Update pivot to show delivery confirmed
+        $supplier->commands()->updateExistingPivot($commandId, [
+            'status' => 'delivered',
+            'delivered_at' => now()
+        ]);
+
+        return response()->json([
+            'message' => 'Delivery confirmed successfully'
+        ]);
+    }
+
+    /**
+     * Get supplier dashboard statistics
+     */
+    public function getDashboardStats($supplierId)
+    {
+        $supplier = Supplier::find($supplierId);
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $totalProducts = $supplier->products()->count();
+        $totalCommands = $supplier->commands()->count();
+        $totalDeliveredCommands = $supplier->commands()->where('status', 'delivered')->count();
+
+        return response()->json([
+            'total_products' => $totalProducts,
+            'total_commands' => $totalCommands,
+            'total_delivered_commands' => $totalDeliveredCommands,
         ]);
     }
 }
