@@ -36,7 +36,11 @@ class MouvementController extends Controller
         $mouvement = Mouvement::create($request->all());
 
         // Update product quantity based on movement type
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::find($request->product_id);
+        
+        if (!$product) {
+            return response()->json(['error' => 'Product not found'], 404);
+        }
         
         if ($request->type === 'IN') {
             $product->increment('quantity', $request->quantity);
