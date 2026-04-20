@@ -6,6 +6,7 @@ use App\Models\Alert;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class AlertController extends Controller
 {
@@ -33,11 +34,33 @@ class AlertController extends Controller
 
         $alerts = $query->orderBy('triggered_at', 'desc')->get();
 
+        return response()->json($alerts);
+    }
+
+    /**
+     * Get active alerts count
+     */
+    public function getActiveCount()
+    {
+        $count = Alert::where('status', 'active')->count();
+
         return response()->json([
-            'message' => 'Alerts retrieved successfully',
-            'alerts' => $alerts,
-            'total' => $alerts->count()
+            'active_alerts' => $count
         ]);
+    }
+
+    /**
+     * Get low stock alerts
+     */
+    public function getLowStockAlerts()
+    {
+        $alerts = Alert::where('type', 'LOW_STOCK')
+                       ->where('status', 'active')
+                       ->with('product')
+                       ->orderBy('triggered_at', 'desc')
+                       ->get();
+
+        return response()->json($alerts);
     }
 
     /**
@@ -52,7 +75,7 @@ class AlertController extends Controller
                 'message' => 'Alert retrieved successfully',
                 'alert' => $alert
             ]);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'message' => 'Alert not found'
             ], 404);
@@ -64,9 +87,8 @@ class AlertController extends Controller
      */
     public function update(Request $request, $id)
     {
-        try {
-            $alert = Alert::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $alert = Alert::find($id);
+        if (!$alert) {
             return response()->json([
                 'message' => 'Alert not found'
             ], 404);
@@ -95,9 +117,8 @@ class AlertController extends Controller
      */
     public function destroy($id)
     {
-        try {
-            $alert = Alert::findOrFail($id);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        $alert = Alert::find($id);
+        if (!$alert) {
             return response()->json([
                 'message' => 'Alert not found'
             ], 404);
@@ -107,36 +128,6 @@ class AlertController extends Controller
 
         return response()->json([
             'message' => 'Alert deleted successfully'
-        ]);
-    }
-
-    /**
-     * Get active alerts count
-     */
-    public function getActiveCount()
-    {
-        $count = Alert::where('status', 'active')->count();
-
-        return response()->json([
-            'active_alerts' => $count
-        ]);
-    }
-
-    /**
-     * Get low stock alerts
-     */
-    public function getLowStockAlerts()
-    {
-        $alerts = Alert::where('type', 'LOW_STOCK')
-                       ->where('status', 'active')
-                       ->with('product')
-                       ->orderBy('triggered_at', 'desc')
-                       ->get();
-
-        return response()->json([
-            'message' => 'Low stock alerts retrieved',
-            'alerts' => $alerts,
-            'total' => $alerts->count()
         ]);
     }
 }
