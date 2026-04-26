@@ -92,3 +92,8 @@ Route::get('/supplier-portal', function () {
 Route::get('/delivery-agent/dashboard', function () {
     return view('delivery-agent-dashboard');
 });
+
+// Role Management shell (Admin & Magasinier)
+Route::get('/role-management', function () {
+    return view('role-management');
+});

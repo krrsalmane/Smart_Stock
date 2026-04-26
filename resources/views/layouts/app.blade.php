@@ -256,10 +256,13 @@
         }
     </style>
 </head>
-<body class="font-body-base antialiased selection:bg-primary/30 selection:text-white flex overflow-hidden">
+<body class="font-body-base antialiased selection:bg-primary/30 selection:text-white flex">
+
+    <!-- MOBILE OVERLAY -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden" onclick="toggleMobileSidebar()"></div>
 
     <!-- SIDEBAR -->
-    <aside class="fixed left-0 top-0 h-full w-[260px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl flex flex-col z-50">
+    <aside id="sidebar" class="fixed left-0 top-0 h-full w-[260px] border-r border-white/10 bg-surface-container/80 backdrop-blur-xl shadow-2xl flex flex-col z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <!-- Logo Area -->
         <div class="px-6 py-6 border-b border-white/10">
             <span class="text-2xl font-black tracking-tighter text-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]">SmartStock</span>
@@ -301,11 +304,15 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <div class="flex flex-col flex-1 ml-[260px] min-h-screen">
+    <div class="flex flex-col flex-1 w-full lg:ml-[260px] min-h-screen">
         
         <!-- TOP APP BAR -->
-        <header class="fixed top-0 right-0 w-[calc(100%-16rem)] border-b border-white/10 bg-surface/70 backdrop-blur-md shadow-lg shadow-black/20 flex justify-between items-center h-16 px-4 md:px-8 z-40">
+        <header class="fixed top-0 right-0 w-full lg:w-[calc(100%-16rem)] border-b border-white/10 bg-surface/70 backdrop-blur-md shadow-lg shadow-black/20 flex justify-between items-center h-16 px-4 md:px-8 z-40 transition-all duration-300">
             <div class="flex items-center gap-4">
+                <!-- MOBILE MENU BUTTON -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-on-surface-variant hover:text-primary transition-colors p-2 -ml-2">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
                 <h1 class="font-title-sm text-sm md:text-lg font-semibold uppercase tracking-widest text-on-surface">@yield('page_title', 'Dashboard')</h1>
             </div>
             <div class="flex items-center gap-4 md:gap-6">
@@ -326,7 +333,7 @@
         </header>
 
         <!-- MAIN SCROLLABLE CONTENT -->
-        <main class="pt-24 pb-20 md:pb-8 px-4 md:px-8 min-h-screen">
+        <main class="pt-24 pb-20 md:pb-8 px-4 md:px-8 min-h-screen overflow-y-auto lg:ml-0">
             @yield('content')
         </main>
     </div>
@@ -334,6 +341,30 @@
     <!-- API Client & Base Logic -->
     <script src="/js/api.js"></script>
     <script>
+        // Mobile sidebar toggle
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Close sidebar on window resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobile-overlay');
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        });
+
         // Sidebar navigation templates for each role
         const sidebarTemplates = {
             admin: `
@@ -383,6 +414,11 @@
                     <span class="material-symbols-outlined mr-3">history</span>
                     Archives
                 </a>
+                
+                <a href="/role-management" class="nav-link flex items-center px-4 py-3 rounded-l-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 font-body-base text-body-sm font-medium tracking-wide transition-all duration-200">
+                    <span class="material-symbols-outlined mr-3">admin_panel_settings</span>
+                    Role Management
+                </a>
             `,
             magasinier: `
                 <a href="/dashboard" class="nav-link flex items-center px-4 py-3 rounded-l-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 font-body-base text-body-sm font-medium tracking-wide transition-all duration-200">
@@ -430,6 +466,11 @@
                 <a href="/archives" class="nav-link flex items-center px-4 py-3 rounded-l-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 font-body-base text-body-sm font-medium tracking-wide transition-all duration-200">
                     <span class="material-symbols-outlined mr-3">history</span>
                     Archives
+                </a>
+                
+                <a href="/role-management" class="nav-link flex items-center px-4 py-3 rounded-l-md text-on-surface-variant hover:text-on-surface hover:bg-white/5 font-body-base text-body-sm font-medium tracking-wide transition-all duration-200">
+                    <span class="material-symbols-outlined mr-3">person_add</span>
+                    Assign Roles
                 </a>
             `,
             client: `

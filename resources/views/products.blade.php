@@ -24,10 +24,10 @@
     <!-- The Glassmorphic Data Table -->
     <div class="glass-panel overflow-hidden w-full relative z-10">
         <!-- Search and Filters Bar -->
-        <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/10">
-            <div class="relative w-72">
+        <div class="p-4 border-b border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-black/10">
+            <div class="relative w-full sm:w-72">
                 <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                <input type="text" id="searchInput" placeholder="Search by SKU or Name..." class="w-full bg-black/40 border border-white/5 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-primary transition-colors">
+                <input type="text" id="searchInput" placeholder="Search by SKU or Name..." class="w-full bg-black/40 border border-white/5 rounded-lg pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:border-brand-primary transition-colors">
             </div>
         </div>
 
