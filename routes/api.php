@@ -16,6 +16,7 @@ use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\DeliveryAgentController;
+use App\Http\Controllers\RoleManagementController;
 
 
 /*
@@ -131,6 +132,11 @@ Route::middleware('jwt')->group(function () {
         Route::get('/delivery-agents', [CommandController::class, 'getAvailableDeliveryAgents']);
         Route::post('/commands/{id}/assign-delivery-agent', [CommandController::class, 'assignDeliveryAgent']);
         Route::get('/commands/for-delivery', [CommandController::class, 'getCommandsForDelivery']);
+        
+        // Role Management (Magasinier)
+        Route::get('/magasinier/assignable-roles', [RoleManagementController::class, 'getAssignableRoles']);
+        Route::get('/magasinier/users-with-roles', [RoleManagementController::class, 'getAllUsersWithRoles']);
+        Route::post('/magasinier/users/{userId}/assign-role', [RoleManagementController::class, 'assignRole']);
     });
 
     /*
@@ -172,6 +178,12 @@ Route::middleware('jwt')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::get('/admin/dashboard', [AdminController::class, 'index']);
         Route::apiResource('/users', UserController::class);
+        
+        // Role Management (Admin)
+        Route::get('/roles/available', [RoleManagementController::class, 'getAvailableRoles']);
+        Route::get('/roles/assignable', [RoleManagementController::class, 'getAssignableRoles']);
+        Route::get('/admin/users-with-roles', [RoleManagementController::class, 'getAllUsersWithRoles']);
+        Route::post('/users/{userId}/assign-role', [RoleManagementController::class, 'assignRole']);
         
         // Chart Data Endpoints
         Route::get('/reports/movement-chart', [ReportController::class, 'getMovementChartData']);
