@@ -12,11 +12,11 @@
             <p class="text-gray-400 mt-1">Track and manage all incoming purchase orders.</p>
         </div>
 
-        <button onclick="document.getElementById('createModal').classList.remove('hidden')" class="bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnCreateOrder" onclick="document.getElementById('createModal').classList.remove('hidden')" class="hidden bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-plus-circle text-lg mr-2"></i> Create Order
         </button>
         
-        <button onclick="exportCommandsReport()" class="bg-brand-secondary hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(123,47,247,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnExport" onclick="exportCommandsReport()" class="hidden bg-brand-secondary hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(123,47,247,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-download-simple text-lg mr-2"></i> Export Report
         </button>
     </div>
@@ -65,10 +65,6 @@
             <form id="createForm" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-400 mb-1">Client ID *</label>
-                        <input type="number" id="c_client_id" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-primary" placeholder="User ID">
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Command Type</label>
                         <select id="c_command_type" class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-primary appearance-none">
                             <option value="purchase">Purchase</option>
@@ -76,13 +72,13 @@
                             <option value="transfer">Transfer</option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Order Date *</label>
                         <input type="datetime-local" id="c_ordered_at" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-primary">
                     </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Expected Delivery</label>
                         <input type="date" id="c_expected_at" class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-primary">
@@ -101,7 +97,7 @@
                         <!-- Product rows will be added here dynamically -->
                         <div class="product-row grid grid-cols-12 gap-2">
                             <div class="col-span-7">
-                                <select required class="product-select w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary appearance-none">
+                                <select required onchange="onProductSelect(this)" class="product-select w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary appearance-none">
                                     <option value="">Select Product...</option>
                                 </select>
                             </div>
@@ -109,7 +105,7 @@
                                 <input type="number" min="1" required class="quantity-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary" placeholder="Qty">
                             </div>
                             <div class="col-span-2">
-                                <input type="number" step="0.01" min="0" required class="price-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary" placeholder="Price">
+                                <input type="number" step="0.01" min="0" required readonly class="price-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-gray-400 text-sm focus:outline-none cursor-not-allowed" placeholder="Auto">
                             </div>
                             <div class="col-span-1 flex items-center justify-center">
                                 <button type="button" onclick="removeProductRow(this)" class="text-gray-500 hover:text-brand-danger transition-colors" title="Remove">
@@ -119,7 +115,7 @@
                         </div>
                     </div>
                     
-                    <p class="text-xs text-gray-500 mt-2">Select product, enter quantity and unit price</p>
+                    <p class="text-xs text-gray-500 mt-2">Select a product and enter quantity — price is filled automatically</p>
                 </div>
 
                 <div class="flex justify-end space-x-3 mt-6 pt-6 border-t border-white/10">
@@ -133,14 +129,65 @@
             </form>
         </div>
     </div>
+
+    <!-- ASSIGN DELIVERY AGENT MODAL -->
+    <div id="assignModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('assignModal').classList.add('hidden')"></div>
+        <div class="glass-panel w-full max-w-md relative z-10 p-6 rounded-2xl border-t border-white/20">
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <i class="ph ph-truck text-brand-warning mr-2"></i> Assign Delivery Agent
+                </h3>
+                <button onclick="document.getElementById('assignModal').classList.add('hidden')" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="ph ph-x text-2xl"></i>
+                </button>
+            </div>
+
+            <form id="assignForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Select Delivery Agent *</label>
+                    <select id="delivery_agent_select" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-warning appearance-none">
+                        <option value="">Loading agents...</option>
+                    </select>
+                </div>
+
+                <div class="border-t border-white/10 pt-4 flex gap-3">
+                    <button type="button" onclick="document.getElementById('assignModal').classList.add('hidden')" class="flex-1 bg-white/5 hover:bg-white/10 text-gray-300 font-semibold px-4 py-3 rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" id="assignBtn" class="flex-1 bg-brand-warning hover:bg-yellow-500 text-black font-semibold px-4 py-3 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all hover:-translate-y-0.5">
+                        Assign Agent
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
 <script>
     // Store products data globally
     let productsData = [];
+    let userRole = '';
 
     document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const userRes = await apiCall('/user', 'GET');
+            if (userRes.status === 200) {
+                userRole = userRes.data.role;
+            }
+        } catch (error) {
+            console.error("Failed to fetch user role", error);
+        }
+
+        if (userRole === 'admin' || userRole === 'magasinier' || userRole === 'client') {
+            document.getElementById('btnCreateOrder')?.classList.remove('hidden');
+        }
+        
+        if (userRole === 'admin' || userRole === 'magasinier') {
+            document.getElementById('btnExport')?.classList.remove('hidden');
+        }
+
         await loadTable();
         await loadProductsDropdown();
     });
@@ -196,7 +243,13 @@
                                 ${expectedObj ? expectedObj.toLocaleDateString() : '-'}
                             </td>
                             <td class="px-6 py-4 text-center text-lg space-x-2">
-                                <button onclick="updateStatus(${item.id})" title="Update Status" class="text-gray-500 hover:text-brand-primary transition-colors"><i class="ph ph-pencil"></i></button>
+                                ${(userRole === 'admin' || userRole === 'magasinier') ? `
+                                    <button onclick="updateStatus(${item.id})" title="Update Status" class="text-gray-500 hover:text-brand-primary transition-colors"><i class="ph ph-pencil"></i></button>
+                                    ${item.delivery_agent_id ? 
+                                        `<span class="text-xs text-brand-success" title="Assigned to ${item.delivery_agent ? item.delivery_agent.name : 'Agent'}"><i class="ph ph-check-circle"></i></span>` :
+                                        `<button onclick="openAssignModal(${item.id})" title="Assign Delivery Agent" class="text-gray-500 hover:text-brand-warning transition-colors"><i class="ph ph-truck"></i></button>`
+                                    }
+                                ` : '<span class="text-xs text-gray-500">View only</span>'}
                             </td>
                         </tr>
                     `;
@@ -211,13 +264,19 @@
     // Load products into all dropdowns
     async function loadProductsDropdown() {
         try {
+            console.log('Loading products...');
             const res = await apiCall('/products', 'GET');
+            console.log('Products response:', res);
             if(res.status === 200 && res.data) {
                 productsData = res.data;
+                console.log('Products loaded:', productsData.length);
                 updateAllProductDropdowns();
+            } else {
+                console.error('Failed to load products:', res);
             }
         } catch (error) {
             console.error("Failed to load products", error);
+            showToast("Failed to load products - check console", "error");
         }
     }
 
@@ -226,10 +285,23 @@
             const currentValue = select.value;
             select.innerHTML = '<option value="">Select Product...</option>';
             productsData.forEach(p => {
-                select.innerHTML += `<option value="${p.id}" class="bg-[#16162a] text-white">${p.name} (${p.sku}) - Stock: ${p.quantity}</option>`;
+                select.innerHTML += `<option value="${p.id}" data-price="${p.price}" class="bg-[#16162a] text-white">${p.name} (${p.sku}) - $${parseFloat(p.price).toFixed(2)}</option>`;
             });
             select.value = currentValue;
         });
+    }
+
+    // Auto-fill price when a product is selected
+    function onProductSelect(selectEl) {
+        const row = selectEl.closest('.product-row');
+        const priceInput = row.querySelector('.price-input');
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        
+        if (selectEl.value && selectedOption.dataset.price) {
+            priceInput.value = parseFloat(selectedOption.dataset.price).toFixed(2);
+        } else {
+            priceInput.value = '';
+        }
     }
 
     // Add a new product row
@@ -239,7 +311,7 @@
         newRow.className = 'product-row grid grid-cols-12 gap-2';
         newRow.innerHTML = `
             <div class="col-span-7">
-                <select required class="product-select w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary appearance-none">
+                <select required onchange="onProductSelect(this)" class="product-select w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary appearance-none">
                     <option value="">Select Product...</option>
                 </select>
             </div>
@@ -247,7 +319,7 @@
                 <input type="number" min="1" required class="quantity-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary" placeholder="Qty">
             </div>
             <div class="col-span-2">
-                <input type="number" step="0.01" min="0" required class="price-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary" placeholder="Price">
+                <input type="number" step="0.01" min="0" required readonly class="price-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-gray-400 text-sm focus:outline-none cursor-not-allowed" placeholder="Auto">
             </div>
             <div class="col-span-1 flex items-center justify-center">
                 <button type="button" onclick="removeProductRow(this)" class="text-gray-500 hover:text-brand-danger transition-colors" title="Remove">
@@ -314,7 +386,6 @@
         }
 
         const payload = { 
-            client_id: parseInt(document.getElementById('c_client_id').value),
             ordered_at: document.getElementById('c_ordered_at').value,
             command_type: document.getElementById('c_command_type').value,
             expected_at: document.getElementById('c_expected_at').value || null,
@@ -334,7 +405,7 @@
                 document.getElementById('products-container').innerHTML = `
                     <div class="product-row grid grid-cols-12 gap-2">
                         <div class="col-span-7">
-                            <select required class="product-select w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary appearance-none">
+                            <select required onchange="onProductSelect(this)" class="product-select w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary appearance-none">
                                 <option value="">Select Product...</option>
                             </select>
                         </div>
@@ -342,7 +413,7 @@
                             <input type="number" min="1" required class="quantity-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary" placeholder="Qty">
                         </div>
                         <div class="col-span-2">
-                            <input type="number" step="0.01" min="0" required class="price-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-primary" placeholder="Price">
+                            <input type="number" step="0.01" min="0" required readonly class="price-input w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-gray-400 text-sm focus:outline-none cursor-not-allowed" placeholder="Auto">
                         </div>
                         <div class="col-span-1 flex items-center justify-center">
                             <button type="button" onclick="removeProductRow(this)" class="text-gray-500 hover:text-brand-danger transition-colors" title="Remove">
@@ -369,5 +440,65 @@
         window.open(`/api/reports/export/commands?token=${token}`, '_blank');
         showToast('Commands report exporting...', 'success');
     }
+
+    // Assign Delivery Agent Modal
+    let currentCommandId = null;
+
+    function openAssignModal(commandId) {
+        currentCommandId = commandId;
+        document.getElementById('assignModal').classList.remove('hidden');
+        loadDeliveryAgents();
+    }
+
+    async function loadDeliveryAgents() {
+        const select = document.getElementById('delivery_agent_select');
+        select.innerHTML = '<option value="">Loading agents...</option>';
+        
+        try {
+            const res = await apiCall('/delivery-agents', 'GET');
+            if(res.status === 200 && res.data.delivery_agents) {
+                select.innerHTML = '<option value="">Select Delivery Agent...</option>';
+                res.data.delivery_agents.forEach(agent => {
+                    select.innerHTML += `<option value="${agent.id}">${agent.name} (${agent.email})</option>`;
+                });
+            }
+        } catch (error) {
+            select.innerHTML = '<option value="">Failed to load agents</option>';
+            showToast('Failed to load delivery agents', 'error');
+        }
+    }
+
+    document.getElementById('assignForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('assignBtn');
+        const agentId = document.getElementById('delivery_agent_select').value;
+
+        if (!agentId) {
+            showToast('Please select a delivery agent', 'error');
+            return;
+        }
+
+        btn.innerHTML = '<i class="ph ph-spinner-gap animate-spin mr-2"></i> Assigning...';
+        btn.disabled = true;
+
+        try {
+            const res = await apiCall(`/commands/${currentCommandId}/assign-delivery-agent`, 'POST', {
+                delivery_agent_id: agentId
+            });
+
+            if(res.status === 200 || res.status === 201) {
+                showToast('Delivery agent assigned successfully!', 'success');
+                document.getElementById('assignModal').classList.add('hidden');
+                loadTable();
+            } else {
+                showToast(res.data.error || 'Failed to assign agent', 'error');
+            }
+        } catch (error) {
+            showToast('Server error: ' + error.message, 'error');
+        } finally {
+            btn.innerHTML = 'Assign Agent';
+            btn.disabled = false;
+        }
+    });
 </script>
 @endpush

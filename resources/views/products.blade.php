@@ -12,11 +12,11 @@
             <p class="text-gray-400 mt-1">Manage and monitor all warehouse stock items.</p>
         </div>
 
-        <button onclick="document.getElementById('productModal').classList.remove('hidden')" class="bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnAddProduct" onclick="document.getElementById('productModal').classList.remove('hidden')" class="hidden bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-plus-circle text-lg mr-2"></i> Add Product
         </button>
         
-        <button onclick="exportProductsReport()" class="bg-brand-secondary hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(123,47,247,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnExportReport" onclick="exportProductsReport()" class="hidden bg-brand-secondary hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(123,47,247,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-download-simple text-lg mr-2"></i> Export Report
         </button>
     </div>
@@ -140,9 +140,34 @@
 <script>
     // Global variable to hold our products so we can search/delete easily
     let allProducts = [];
+    let userRole = '';
 
     // --- 1. Load Data on Startup ---
     document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const userRes = await apiCall('/user', 'GET');
+            if (userRes.status === 200) {
+                userRole = userRes.data.role;
+            }
+        } catch (error) {
+            console.error("Failed to fetch user role", error);
+        }
+
+        // Suppliers and delivery agents cannot access the products page
+        if (userRole === 'supplier') {
+            window.location.href = '/supplier-portal';
+            return;
+        }
+        if (userRole === 'delivery_agent') {
+            window.location.href = '/delivery-agent/dashboard';
+            return;
+        }
+
+        if (userRole === 'admin' || userRole === 'magasinier') {
+            document.getElementById('btnAddProduct')?.classList.remove('hidden');
+            document.getElementById('btnExportReport')?.classList.remove('hidden');
+        }
+
         await loadProductsTable();
         await loadDropdowns();
     });
@@ -223,8 +248,10 @@
                         <i class="ph ph-buildings mr-1"></i> ${product.warehouse ? product.warehouse.name : '-'}
                     </td>
                     <td class="px-6 py-4 text-center text-lg space-x-2">
-                        <!-- We pass the product ID directly to our simple delete function -->
-                        <button onclick="deleteProduct(${product.id})" title="Delete Product" class="text-gray-500 hover:text-brand-danger transition-colors"><i class="ph ph-trash"></i></button>
+                        ${(userRole === 'admin' || userRole === 'magasinier') ? 
+                            `<button onclick="deleteProduct(${product.id})" title="Delete Product" class="text-gray-500 hover:text-brand-danger transition-colors"><i class="ph ph-trash"></i></button>` : 
+                            '<span class="text-xs text-gray-500">-</span>'
+                        }
                     </td>
                 </tr>
             `;
@@ -246,18 +273,26 @@
 
             // Populate Categories
             if(catRes.status === 200 && catRes.data) {
-                catSelect.innerHTML = '<option value="" disabled selected>-- Select Category --</option>';
-                catRes.data.forEach(c => {
-                    catSelect.innerHTML += `<option value="${c.id}" class="bg-[#16162a] text-white">${c.name}</option>`;
-                });
+                if (catRes.data.length === 0) {
+                    catSelect.innerHTML = '<option value="">No categories available</option>';
+                } else {
+                    catSelect.innerHTML = '<option value="" disabled selected>-- Select Category --</option>';
+                    catRes.data.forEach(c => {
+                        catSelect.innerHTML += `<option value="${c.id}" class="bg-[#16162a] text-white">${c.name}</option>`;
+                    });
+                }
             }
 
             // Populate Warehouses
             if(whRes.status === 200 && whRes.data) {
-                whSelect.innerHTML = '<option value="" disabled selected>-- Select Warehouse --</option>';
-                whRes.data.forEach(w => {
-                    whSelect.innerHTML += `<option value="${w.id}" class="bg-[#16162a] text-white">${w.name}</option>`;
-                });
+                if (whRes.data.length === 0) {
+                    whSelect.innerHTML = '<option value="">No warehouses available for your account</option>';
+                } else {
+                    whSelect.innerHTML = '<option value="" disabled selected>-- Select Warehouse --</option>';
+                    whRes.data.forEach(w => {
+                        whSelect.innerHTML += `<option value="${w.id}" class="bg-[#16162a] text-white">${w.name}</option>`;
+                    });
+                }
             }
         } catch (error) {
             console.error("Failed to load dropdowns", error);
@@ -285,18 +320,30 @@
             warehouse_id: parseInt(document.getElementById('p_warehouse').value)
         };
 
+        if (Number.isNaN(payload.category_id) || Number.isNaN(payload.warehouse_id)) {
+            showToast("Please select both category and warehouse.", "error");
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+        }
+
         try {
             // Send payload to backend
             const response = await apiCall('/products', 'POST', payload);
 
             if(response.status === 201) {
                 showToast("Product created successfully!");
+                if (response.data && response.data.product) {
+                    allProducts.unshift(response.data.product);
+                    document.getElementById('total_products_count').innerText = allProducts.length + ' Items';
+                    renderTable(allProducts);
+                }
                 // Close modal
                 document.getElementById('productModal').classList.add('hidden');
                 // Clear the form
                 document.getElementById('createProductForm').reset();
                 // Reload the table
-                loadProductsTable();
+                await loadProductsTable();
             } else {
                 showToast("Failed to create product. Check inputs.", "error");
                 console.error(response.data);

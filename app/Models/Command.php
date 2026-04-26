@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Command extends Model
 {
-    protected $fillable = ['status', 'command_type', 'ordered_at', 'expected_at', 'total_cost', 'client_id', 'notes', 'cancelled_at', 'cancellation_reason'];
+    protected $fillable = ['status', 'command_type', 'ordered_at', 'expected_at', 'total_cost', 'client_id', 'notes', 'cancelled_at', 'cancellation_reason', 'delivery_agent_id', 'delivery_started_at', 'delivered_at', 'current_location', 'delivery_location', 'assigned_at'];
 
     protected $casts = [
         'ordered_at' => 'datetime',
         'expected_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'delivery_started_at' => 'datetime',
+        'delivered_at' => 'datetime',
+        'assigned_at' => 'datetime',
     ];
 
     public function products(): BelongsToMany {
@@ -23,6 +26,13 @@ class Command extends Model
 
     public function client(): BelongsTo {
         return $this->belongsTo(User::class, 'client_id');
+    }
+
+    /**
+     * Get the delivery agent assigned to this command.
+     */
+    public function deliveryAgent(): BelongsTo {
+        return $this->belongsTo(User::class, 'delivery_agent_id');
     }
 
     /**
@@ -65,19 +75,70 @@ class Command extends Model
      */
     public function getTrackingStatus()
     {
-        $tracking = [];
+        $supplierConfirmedAt = null;
+        $supplierShippedAt = null;
+
         foreach ($this->suppliers as $supplier) {
             $pivot = $supplier->pivot;
-            $tracking[] = [
-                'supplier' => $supplier->name,
-                'status' => $pivot->status,
-                'tracking_number' => $pivot->tracking_number,
-                'shipped_at' => $pivot->shipped_at,
-                'delivered_at' => $pivot->delivered_at,
-                'delivery_date' => $pivot->delivery_date,
+
+            if (in_array($pivot->status, ['confirmed', 'shipped', 'delivered'])) {
+                $confirmedAt = $pivot->updated_at ?? null;
+                if ($confirmedAt && (!$supplierConfirmedAt || $confirmedAt < $supplierConfirmedAt)) {
+                    $supplierConfirmedAt = $confirmedAt;
+                }
+            }
+
+            if (in_array($pivot->status, ['shipped', 'delivered'])) {
+                $shippedAt = $pivot->shipped_at ?? $pivot->updated_at ?? null;
+                if ($shippedAt && (!$supplierShippedAt || $shippedAt < $supplierShippedAt)) {
+                    $supplierShippedAt = $shippedAt;
+                }
+            }
+        }
+
+        $timeline = [
+            [
+                'label' => 'Order placed',
+                'completed' => true,
+                'timestamp' => $this->created_at,
+            ],
+            [
+                'label' => 'Order approved',
+                'completed' => $this->status !== 'pending',
+                'timestamp' => $this->status !== 'pending' ? $this->updated_at : null,
+            ],
+            [
+                'label' => 'Supplier confirmed',
+                'completed' => $supplierConfirmedAt !== null,
+                'timestamp' => $supplierConfirmedAt,
+            ],
+            [
+                'label' => 'Shipped by supplier',
+                'completed' => $supplierShippedAt !== null,
+                'timestamp' => $supplierShippedAt,
+            ],
+            [
+                'label' => 'Out for delivery',
+                'completed' => in_array($this->status, ['in_transit', 'delayed', 'delivered']),
+                'timestamp' => in_array($this->status, ['in_transit', 'delayed', 'delivered']) ? ($this->delivery_started_at ?? $this->updated_at) : null,
+            ],
+        ];
+
+        if ($this->status === 'delayed') {
+            $timeline[] = [
+                'label' => 'Delivery delayed',
+                'completed' => true,
+                'timestamp' => $this->updated_at,
+            ];
+        } else {
+            $timeline[] = [
+                'label' => 'Delivered',
+                'completed' => $this->status === 'delivered',
+                'timestamp' => $this->status === 'delivered' ? ($this->delivered_at ?? $this->updated_at) : null,
             ];
         }
-        return $tracking;
+
+        return $timeline;
     }
 
     /**

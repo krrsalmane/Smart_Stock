@@ -12,61 +12,49 @@ class AlertService
      */
     public static function checkStockLevels(Product $product)
     {
-        // Check if product quantity is below alert threshold
-        if ($product->quantity < $product->alert_threshold) {
-            // Check if alert already exists for this product (active)
-            $existingAlert = Alert::where('product_id', $product->id)
-                                   ->where('status', 'active')
-                                   ->where('type', 'LOW_STOCK')
-                                   ->first();
+        $alertType = null;
 
-            // Only create if no active alert exists
-            if (!$existingAlert) {
+        if ($product->quantity === 0) {
+            $alertType = 'OUT_OF_STOCK';
+        } elseif ($product->quantity > 0 && $product->quantity <= $product->alert_threshold) {
+            $alertType = 'LOW_STOCK';
+        } elseif ($product->quantity > $product->alert_threshold && $product->quantity <= ($product->alert_threshold * 2)) {
+            $alertType = 'ALMOST_LOW';
+        }
+
+        if ($alertType) {
+            Alert::where('product_id', $product->id)
+                 ->where('status', 'active')
+                 ->whereIn('type', ['OUT_OF_STOCK', 'LOW_STOCK', 'ALMOST_LOW'])
+                 ->where('type', '!=', $alertType)
+                 ->update(['status' => 'resolved']);
+
+            $existingAlert = Alert::where('product_id', $product->id)
+                                  ->where('status', 'active')
+                                  ->where('type', $alertType)
+                                  ->first();
+
+            if ($existingAlert) {
+                $existingAlert->update([
+                    'triggered_at' => now(),
+                ]);
+            } else {
                 Alert::create([
                     'product_id' => $product->id,
-                    'type' => 'LOW_STOCK',
+                    'type' => $alertType,
                     'status' => 'active',
                     'triggered_at' => now(),
                 ]);
             }
         } else {
-            // If quantity is now above threshold, dismiss any active LOW_STOCK alerts
+            // If quantity is now above alert_threshold * 2, dismiss active stock alerts
             Alert::where('product_id', $product->id)
                  ->where('status', 'active')
-                 ->where('type', 'LOW_STOCK')
+                 ->whereIn('type', ['OUT_OF_STOCK', 'LOW_STOCK', 'ALMOST_LOW'])
                  ->update(['status' => 'resolved']);
         }
     }
 
-    /**
-     * Create alert for inventory discrepancy
-     */
-    public static function createDiscrepancyAlert(Product $product, $expected, $actual)
-    {
-        Alert::create([
-            'product_id' => $product->id,
-            'type' => 'DISCREPANCY',
-            'status' => 'active',
-            'triggered_at' => now(),
-        ]);
-    }
-
-    /**
-     * Create alert for product adjustment
-     */
-    public static function createAdjustmentAlert(Product $product)
-    {
-        Alert::create([
-            'product_id' => $product->id,
-            'type' => 'ADJUSTMENT',
-            'status' => 'active',
-            'triggered_at' => now(),
-        ]);
-    }
-
-    /**
-     * Get active alerts count
-     */
     public static function getActiveAlertsCount()
     {
         return Alert::where('status', 'active')->count();

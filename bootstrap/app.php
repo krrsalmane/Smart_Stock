@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'magasinier' => \App\Http\Middleware\MagasinierMiddleware::class,
             'supplier' => \App\Http\Middleware\SupplierMiddleware::class,
+            'delivery_agent' => \App\Http\Middleware\DeliveryAgentMiddleware::class,
         ]);
         //
     })

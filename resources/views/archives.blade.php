@@ -1,64 +1,66 @@
 @extends('layouts.app')
 
+@section('page_title', 'Archive History')
+
 @section('content')
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8" x-data="archive()">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Archive History</h1>
-        <p class="text-gray-600 mt-2">View archived product snapshots and historical records</p>
+        <h1 class="text-3xl font-bold text-white">Archive History</h1>
+        <p class="text-gray-400 mt-2">View archived product snapshots and historical records</p>
     </div>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="glass-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Archives</p>
-                    <p class="text-3xl font-bold text-gray-900" x-text="archives.total">0</p>
+                    <p class="text-gray-400 text-sm">Total Archives</p>
+                    <p class="text-3xl font-bold text-white" x-text="archives.total">0</p>
                 </div>
-                <div class="bg-blue-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-brand-primary/20 rounded-full p-3">
+                    <svg class="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="glass-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Today</p>
-                    <p class="text-3xl font-bold text-gray-900" x-text="todayCount">0</p>
+                    <p class="text-gray-400 text-sm">Today</p>
+                    <p class="text-3xl font-bold text-white" x-text="todayCount">0</p>
                 </div>
-                <div class="bg-green-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-brand-success/20 rounded-full p-3">
+                    <svg class="w-6 h-6 text-brand-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="glass-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">This Month</p>
-                    <p class="text-3xl font-bold text-gray-900" x-text="monthCount">0</p>
+                    <p class="text-gray-400 text-sm">This Month</p>
+                    <p class="text-3xl font-bold text-white" x-text="monthCount">0</p>
                 </div>
-                <div class="bg-yellow-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-brand-warning/20 rounded-full p-3">
+                    <svg class="w-6 h-6 text-brand-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="glass-card p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-sm">Total Quantity</p>
-                    <p class="text-3xl font-bold text-gray-900" x-text="totalQuantity">0</p>
+                    <p class="text-gray-400 text-sm">Total Quantity</p>
+                    <p class="text-3xl font-bold text-white" x-text="totalQuantity">0</p>
                 </div>
-                <div class="bg-purple-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-brand-secondary/20 rounded-full p-3">
+                    <svg class="w-6 h-6 text-brand-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m0 10v10l8 4m8-4v-10"/>
                     </svg>
                 </div>
@@ -113,6 +115,7 @@
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">ID</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Action</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Product</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Quantity</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">User</th>
@@ -125,8 +128,14 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-6 py-4 text-sm text-gray-900">#<span x-text="archive.id"></span></td>
                             <td class="px-6 py-4 text-sm">
-                                <span class="font-medium text-gray-900" x-text="archive.product.name"></span>
-                                <p class="text-gray-500 text-xs">SKU: <span x-text="archive.product.sku"></span></p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                      :class="getActionBadgeClass(archive.action)">
+                                    <span x-text="archive.action_label || archive.action"></span>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="font-medium text-gray-900" x-text="archive.product_name || archive.product?.name"></span>
+                                <p class="text-gray-500 text-xs">SKU: <span x-text="archive.product_sku || archive.product?.sku"></span></p>
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
@@ -151,7 +160,7 @@
                     </template>
                     <template x-if="filteredArchives.length === 0">
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                                 No archive records found
                             </td>
                         </tr>
@@ -207,20 +216,20 @@
                             <p class="text-lg font-semibold text-gray-900" x-text="'#' + selectedArchive.id"></p>
                         </div>
                         <div>
+                            <p class="text-sm font-medium text-gray-600">Action Type</p>
+                            <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.action_label || selectedArchive.action"></p>
+                        </div>
+                        <div>
                             <p class="text-sm font-medium text-gray-600">Product</p>
-                            <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.product?.name"></p>
+                            <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.product_name || selectedArchive.product?.name"></p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-600">SKU</p>
-                            <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.product?.sku"></p>
+                            <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.product_sku || selectedArchive.product?.sku"></p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-600">Quantity Archived</p>
                             <p class="text-lg font-semibold text-blue-600" x-text="selectedArchive.quantity + ' units'"></p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Category</p>
-                            <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.product?.category?.name || 'N/A'"></p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-600">Archived By</p>
@@ -233,6 +242,25 @@
                         <div>
                             <p class="text-sm font-medium text-gray-600">User Email</p>
                             <p class="text-lg font-semibold text-gray-900" x-text="selectedArchive.user?.email || 'N/A'"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes Section -->
+                    <div x-show="selectedArchive.notes" class="border-t border-gray-200 pt-4">
+                        <p class="text-sm font-medium text-gray-600 mb-2">Notes</p>
+                        <p class="text-sm text-gray-900 bg-gray-50 p-3 rounded" x-text="selectedArchive.notes"></p>
+                    </div>
+                    
+                    <!-- Snapshot Data Section -->
+                    <div x-show="selectedArchive.snapshot_data" class="border-t border-gray-200 pt-4">
+                        <p class="text-sm font-medium text-gray-600 mb-2">Product State at Archive</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><span class="text-gray-600">Price:</span> <span class="font-semibold" x-text="'$' + (selectedArchive.snapshot_data?.price || 'N/A')"></span></div>
+                                <div><span class="text-gray-600">Category ID:</span> <span class="font-semibold" x-text="selectedArchive.snapshot_data?.category_id || 'N/A'"></span></div>
+                                <div><span class="text-gray-600">Warehouse ID:</span> <span class="font-semibold" x-text="selectedArchive.snapshot_data?.warehouse_id || 'N/A'"></span></div>
+                                <div><span class="text-gray-600">Alert Threshold:</span> <span class="font-semibold" x-text="selectedArchive.snapshot_data?.alert_threshold || 'N/A'"></span></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -272,7 +300,7 @@ document.addEventListener('alpine:init', () => {
 
         async loadArchives() {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('smartstock_token');
                 const response = await fetch('/api/archives', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -290,7 +318,7 @@ document.addEventListener('alpine:init', () => {
 
         async applyFilters() {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem('smartstock_token');
                 const params = new URLSearchParams();
                 if (this.filters.user_id) params.append('user_id', this.filters.user_id);
                 if (this.filters.from_date) params.append('date', this.filters.from_date);
@@ -358,6 +386,18 @@ document.addEventListener('alpine:init', () => {
             this.$nextTick(() => {
                 // Stats are computed properties, no need for manual update
             });
+        },
+
+        getActionBadgeClass(action) {
+            const classes = {
+                'snapshot': 'bg-gray-100 text-gray-800',
+                'before_delete': 'bg-red-100 text-red-800',
+                'before_update': 'bg-yellow-100 text-yellow-800',
+                'stock_in': 'bg-green-100 text-green-800',
+                'stock_out': 'bg-orange-100 text-orange-800',
+                'manual': 'bg-blue-100 text-blue-800'
+            };
+            return classes[action] || 'bg-gray-100 text-gray-800';
         },
 
         viewDetails(archive) {

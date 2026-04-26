@@ -195,6 +195,60 @@ class SupplierController extends Controller
     }
 
     /**
+     * Detach product from supplier
+     */
+    public function detachProduct(Request $request, $id, $productId = null)
+    {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $targetProductId = $productId ?? $request->input('product_id');
+        if (!$targetProductId) {
+            return response()->json([
+                'message' => 'Product ID is required'
+            ], 422);
+        }
+
+        $supplier->products()->detach($targetProductId);
+
+        return response()->json([
+            'message' => 'Product unlinked from supplier successfully',
+            'supplier' => $supplier->load('products')
+        ]);
+    }
+
+    /**
+     * Detach command from supplier
+     */
+    public function detachCommand(Request $request, $id, $commandId = null)
+    {
+        $supplier = Supplier::find($id);
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $targetCommandId = $commandId ?? $request->input('command_id');
+        if (!$targetCommandId) {
+            return response()->json([
+                'message' => 'Command ID is required'
+            ], 422);
+        }
+
+        $supplier->commands()->detach($targetCommandId);
+
+        return response()->json([
+            'message' => 'Command unlinked from supplier successfully',
+            'supplier' => $supplier->load('commands')
+        ]);
+    }
+
+    /**
      * Get commands assigned to a supplier
      */
     public function getCommands($id)
@@ -211,26 +265,6 @@ class SupplierController extends Controller
         return response()->json([
             'message' => 'Commands retrieved successfully',
             'commands' => $commands
-        ]);
-    }
-
-    /**
-     * Get products supplied by a supplier
-     */
-    public function getProducts($id)
-    {
-        $supplier = Supplier::find($id);
-        if (!$supplier) {
-            return response()->json([
-                'message' => 'Supplier not found'
-            ], 404);
-        }
-
-        $products = $supplier->products()->with('commands')->get();
-
-        return response()->json([
-            'message' => 'Products retrieved successfully',
-            'products' => $products
         ]);
     }
 
@@ -332,25 +366,139 @@ class SupplierController extends Controller
     }
 
     /**
-     * Get supplier dashboard statistics
+     * Get commands for currently authenticated supplier
      */
-    public function getDashboardStats($supplierId)
+    public function receiveCommand()
     {
-        $supplier = Supplier::find($supplierId);
+        $user = auth()->user();
+        $supplier = Supplier::where('email', $user->email)->first();
+
         if (!$supplier) {
             return response()->json([
                 'message' => 'Supplier not found'
             ], 404);
         }
 
-        $totalProducts = $supplier->products()->count();
-        $totalCommands = $supplier->commands()->count();
-        $totalDeliveredCommands = $supplier->commands()->where('status', 'delivered')->count();
+        $commands = $supplier->commands()
+            ->with(['client', 'products'])
+            ->orderBy('commands.created_at', 'desc')
+            ->get();
+
+        $formatted = $commands->map(function ($command) {
+            return [
+                'command_id' => $command->id,
+                'command_type' => $command->command_type,
+                'client' => $command->client ? $command->client->name : 'N/A',
+                'total_cost' => $command->total_cost,
+                'ordered_at' => $command->ordered_at,
+                'expected_at' => $command->expected_at,
+                'order_date' => $command->pivot->order_date,
+                'expected_delivery' => $command->pivot->expected_delivery,
+                'delivery_status' => $command->pivot->status ?? 'pending',
+                'shipped_at' => $command->pivot->shipped_at,
+                'delivered_at' => $command->pivot->delivered_at,
+                'can_decide' => ($command->pivot->status ?? 'pending') === 'pending',
+            ];
+        });
 
         return response()->json([
-            'total_products' => $totalProducts,
-            'total_commands' => $totalCommands,
-            'total_delivered_commands' => $totalDeliveredCommands,
+            'message' => 'Commands retrieved successfully',
+            'commands' => $formatted
+        ]);
+    }
+
+    /**
+     * Accept or decline assigned command for currently authenticated supplier
+     */
+    public function decideCommand(Request $request, $commandId)
+    {
+        $user = auth()->user();
+        $supplier = Supplier::where('email', $user->email)->first();
+
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'decision' => 'required|in:accept,decline',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $command = $supplier->commands()->where('command_id', $commandId)->first();
+        if (!$command) {
+            return response()->json([
+                'message' => 'Command not found for this supplier'
+            ], 404);
+        }
+
+        $currentStatus = $command->pivot->status ?? 'pending';
+        if ($currentStatus !== 'pending') {
+            return response()->json([
+                'message' => 'This command has already been processed'
+            ], 422);
+        }
+
+        $newStatus = $request->decision === 'accept' ? 'confirmed' : 'cancelled';
+
+        $supplier->commands()->updateExistingPivot($commandId, [
+            'status' => $newStatus,
+            'notes' => $request->decision === 'accept'
+                ? 'Accepted by supplier'
+                : 'Declined by supplier',
+        ]);
+
+        return response()->json([
+            'message' => $request->decision === 'accept'
+                ? 'Command accepted successfully'
+                : 'Command declined successfully'
+        ]);
+    }
+
+    /**
+     * Mark command as shipped for currently authenticated supplier
+     */
+    public function sendDelivery(Request $request, $commandId)
+    {
+        $user = auth()->user();
+        $supplier = Supplier::where('email', $user->email)->first();
+
+        if (!$supplier) {
+            return response()->json([
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+
+        if (!$supplier->commands()->where('command_id', $commandId)->exists()) {
+            return response()->json([
+                'message' => 'Command not found for this supplier'
+            ], 404);
+        }
+
+        $command = $supplier->commands()->where('command_id', $commandId)->first();
+        if (!$command) {
+            return response()->json([
+                'message' => 'Command not found for this supplier'
+            ], 404);
+        }
+
+        if (($command->pivot->status ?? 'pending') !== 'confirmed') {
+            return response()->json([
+                'message' => 'Only accepted commands can be shipped'
+            ], 422);
+        }
+
+        $supplier->commands()->updateExistingPivot($commandId, [
+            'status' => 'shipped',
+            'shipped_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Delivery sent successfully'
         ]);
     }
 }

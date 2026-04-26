@@ -22,4 +22,13 @@ class Mouvement extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get the delivery agent who created this movement (if applicable)
+     */
+    public function deliveryAgent()
+    {
+        return $this->belongsTo(User::class, 'user_id')
+                    ->where('role', 'delivery_agent');
+    }
 }

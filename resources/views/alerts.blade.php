@@ -51,7 +51,18 @@
 
 @push('scripts')
 <script>
+    let userRole = '';
+
     document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const userRes = await apiCall('/user', 'GET');
+            if (userRes.status === 200) {
+                userRole = userRes.data.role;
+            }
+        } catch (error) {
+            console.error("Failed to fetch user role", error);
+        }
+
         await loadTable();
     });
 
@@ -116,17 +127,19 @@
                                 ${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}
                             </td>
                             <td class="px-6 py-4 text-center text-lg space-x-2">
-                                ${item.status === 'active' ? `
-                                    <button onclick="updateAlertStatus(${item.id}, 'dismissed')" title="Dismiss Alert" class="text-gray-500 hover:text-brand-warning transition-colors">
-                                        <i class="ph ph-check-circle"></i>
+                                ${(userRole === 'admin' || userRole === 'magasinier') ? `
+                                    ${item.status === 'active' ? `
+                                        <button onclick="updateAlertStatus(${item.id}, 'dismissed')" title="Dismiss Alert" class="text-gray-500 hover:text-brand-warning transition-colors">
+                                            <i class="ph ph-check-circle"></i>
+                                        </button>
+                                        <button onclick="updateAlertStatus(${item.id}, 'resolved')" title="Mark Resolved" class="text-gray-500 hover:text-brand-success transition-colors">
+                                            <i class="ph ph-check-square"></i>
+                                        </button>
+                                    ` : ''}
+                                    <button onclick="deleteAlert(${item.id})" title="Delete Alert" class="text-gray-500 hover:text-brand-danger transition-colors">
+                                        <i class="ph ph-trash"></i>
                                     </button>
-                                    <button onclick="updateAlertStatus(${item.id}, 'resolved')" title="Mark Resolved" class="text-gray-500 hover:text-brand-success transition-colors">
-                                        <i class="ph ph-check-square"></i>
-                                    </button>
-                                ` : ''}
-                                <button onclick="deleteAlert(${item.id})" title="Delete Alert" class="text-gray-500 hover:text-brand-danger transition-colors">
-                                    <i class="ph ph-trash"></i>
-                                </button>
+                                ` : '<span class="text-xs text-gray-500">View only</span>'}
                             </td>
                         </tr>
                     `;

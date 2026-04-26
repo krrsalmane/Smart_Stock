@@ -12,11 +12,11 @@
             <p class="text-gray-400 mt-1">Audit trail for all incoming and outgoing stock.</p>
         </div>
 
-        <button onclick="document.getElementById('createModal').classList.remove('hidden')" class="bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnRegisterMovement" onclick="document.getElementById('createModal').classList.remove('hidden')" class="hidden bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-arrows-left-right text-lg mr-2"></i> Register Movement
         </button>
         
-        <button onclick="exportMovementsReport()" class="bg-brand-secondary hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(123,47,247,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnExport" onclick="exportMovementsReport()" class="hidden bg-brand-secondary hover:bg-purple-600 text-white font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(123,47,247,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-download-simple text-lg mr-2"></i> Export Report
         </button>
     </div>
@@ -116,7 +116,23 @@
 
 @push('scripts')
 <script>
+    let userRole = '';
+
     document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const userRes = await apiCall('/user', 'GET');
+            if (userRes.status === 200) {
+                userRole = userRes.data.role;
+            }
+        } catch (error) {
+            console.error("Failed to fetch user role", error);
+        }
+
+        if (userRole === 'admin' || userRole === 'magasinier') {
+            document.getElementById('btnRegisterMovement')?.classList.remove('hidden');
+            document.getElementById('btnExport')?.classList.remove('hidden');
+        }
+
         await loadTable();
         await loadProductsDropdown();
         

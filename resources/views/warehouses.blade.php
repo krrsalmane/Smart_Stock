@@ -12,7 +12,7 @@
             <p class="text-gray-400 mt-1">Manage physical locations where inventory is stored.</p>
         </div>
 
-        <button onclick="document.getElementById('createModal').classList.remove('hidden')" class="bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
+        <button id="btnRegisterWarehouse" onclick="document.getElementById('createModal').classList.remove('hidden')" class="hidden bg-brand-primary hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-xl shadow-[0_0_15px_rgba(0,212,255,0.4)] transition-all hover:-translate-y-0.5 flex items-center">
             <i class="ph ph-plus-circle text-lg mr-2"></i> Register Warehouse
         </button>
     </div>
@@ -84,7 +84,22 @@
 
 @push('scripts')
 <script>
+    let userRole = '';
+
     document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const userRes = await apiCall('/user', 'GET');
+            if (userRes.status === 200) {
+                userRole = userRes.data.role;
+            }
+        } catch (error) {
+            console.error("Failed to fetch user role", error);
+        }
+
+        if (userRole === 'admin' || userRole === 'magasinier') {
+            document.getElementById('btnRegisterWarehouse')?.classList.remove('hidden');
+        }
+
         await loadTable();
     });
 
@@ -123,7 +138,9 @@
                                 <p class="text-[10px] text-gray-500 mt-1">${item.current_stock} / ${item.capacity || '∞'} Items ${item.is_full ? '<span class="text-brand-danger font-bold uppercase ml-1">FULL</span>' : ''}</p>
                             </td>
                             <td class="px-6 py-4 text-right text-lg space-x-2">
-                                <button onclick="deleteItem(${item.id})" class="text-gray-500 hover:text-brand-danger transition-colors"><i class="ph ph-trash"></i></button>
+                                ${(userRole === 'admin' || userRole === 'magasinier') ? `
+                                    <button onclick="deleteItem(${item.id})" class="text-gray-500 hover:text-brand-danger transition-colors"><i class="ph ph-trash"></i></button>
+                                ` : '<span class="text-xs text-gray-500">-</span>'}
                             </td>
                         </tr>
                     `;

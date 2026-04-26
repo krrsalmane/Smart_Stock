@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Services\AlertService;
+use App\Services\ArchiveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -20,7 +21,6 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validation to ensure data integrity
         $validator = Validator::make($request->all(), [
             'name'            => 'required|string|max:255',
             'sku'             => 'required|string|unique:products,sku',
@@ -35,10 +35,7 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // 2. Create the Product record
         $product = Product::create($request->all());
-
-        // 3. Check stock levels and create alerts if needed
         AlertService::checkStockLevels($product);
 
         return response()->json([
@@ -87,6 +84,22 @@ class ProductController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        // Archive before update if significant fields are changing
+        $significantFields = ['quantity', 'price', 'name', 'sku'];
+        $changes = [];
+        foreach ($significantFields as $field) {
+            if ($request->has($field) && $product->$field != $request->$field) {
+                $changes[$field] = [
+                    'old' => $product->$field,
+                    'new' => $request->$field
+                ];
+            }
+        }
+        
+        if (!empty($changes)) {
+            ArchiveService::archiveBeforeUpdate($product, $changes);
+        }
+
         // Update only provided fields
         $product->update($request->all());
 
@@ -108,9 +121,16 @@ class ProductController extends Controller
             ], 404);
         }
 
-        // Dismiss all alerts for this product before deletion
-        AlertService::dismissProductAlerts($product);
+        try {
+            ArchiveService::archiveBeforeDelete($product, 'Product deleted from system');
+        } catch (\Exception $e) {
+            \Log::error('Failed to archive product before deletion', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
+        AlertService::dismissProductAlerts($product);
         $product->delete();
 
         return response()->json([

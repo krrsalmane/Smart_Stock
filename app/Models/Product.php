@@ -79,4 +79,12 @@ class Product extends Model
         return $this->belongsToMany(Supplier::class)
                     ->withPivot('cost_price', 'lead_time');
     }
+
+    /**
+     * Get the archive snapshots for this product.
+     */
+    public function archives(): HasMany
+    {
+        return $this->hasMany(Archive::class);
+    }
 }

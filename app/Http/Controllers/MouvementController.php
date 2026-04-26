@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Mouvement;
 use App\Models\Product;
 use App\Services\AlertService;
+use App\Services\ArchiveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +18,6 @@ class MouvementController extends Controller
         return response()->json($mouvements);
     }
 
-    // Create a new mouvement
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -42,15 +42,28 @@ class MouvementController extends Controller
             return response()->json(['error' => 'Product not found'], 404);
         }
         
+        // Archive current state before movement
+        $oldQuantity = $product->quantity;
+        
         if ($request->type === 'IN') {
             $product->increment('quantity', $request->quantity);
+            ArchiveService::archiveStockIn($product, $request->quantity, $request->note);
         } elseif ($request->type === 'OUT') {
             $product->decrement('quantity', $request->quantity);
+            ArchiveService::archiveStockOut($product, $request->quantity, $request->note);
         } elseif ($request->type === 'ADJ') {
             // For adjustment, set the quantity directly if provided
             if ($request->has('new_quantity')) {
+                $adjustment = $request->new_quantity - $product->quantity;
                 $product->quantity = $request->new_quantity;
                 $product->save();
+                
+                // Archive with appropriate action based on direction
+                if ($adjustment > 0) {
+                    ArchiveService::archiveStockIn($product, $adjustment, $request->note ?: 'Quantity adjustment (increase)');
+                } else {
+                    ArchiveService::archiveStockOut($product, abs($adjustment), $request->note ?: 'Quantity adjustment (decrease)');
+                }
             }
             AlertService::createAdjustmentAlert($product);
         }

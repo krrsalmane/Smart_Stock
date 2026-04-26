@@ -27,7 +27,12 @@ class WarehouseController extends Controller
         $user = Auth::user();
 
         if ($user->role === 'magasinier') {
-            $warehouses = Warehouse::where('user_id', $user->id)->with('products', 'magasinier')->get();
+            $warehouses = Warehouse::where(function ($query) use ($user) {
+                    $query->where('user_id', $user->id)
+                          ->orWhereNull('user_id');
+                })
+                ->with('products', 'magasinier')
+                ->get();
         } else {
             $warehouses = Warehouse::with('products', 'magasinier')->get();
         }

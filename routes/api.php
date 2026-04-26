@@ -15,6 +15,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\DeliveryAgentController;
 
 
 /*
@@ -53,6 +54,10 @@ Route::middleware('jwt')->group(function () {
     Route::post('/commands', [CommandController::class, 'store']);
     Route::put('/commands/{id}', [CommandController::class, 'update']);
     Route::post('/commands/{id}/cancel', [CommandController::class, 'cancel']);
+    
+    // Products (viewable by all authenticated users for order creation)
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::get('/products/{id}', [ProductController::class, 'show']);
 
     // Supplier CRUD Routes (accessible to authenticated users)
     Route::get('/suppliers', [SupplierController::class, 'index']);
@@ -62,16 +67,16 @@ Route::middleware('jwt')->group(function () {
     Route::delete('/suppliers/{id}', [SupplierController::class, 'destroy']);
     
     // Supplier-Product & Supplier-Command Relationships
-    Route::post('/suppliers/{id}/products', [SupplierController::class, 'attachProduct']);
+    Route::post('/suppliers/{id}/products', [SupplierController::class, 'assignProducts']);
     Route::delete('/suppliers/{id}/products/{productId}', [SupplierController::class, 'detachProduct']);
-    Route::post('/suppliers/{id}/commands', [SupplierController::class, 'attachCommand']);
+    Route::post('/suppliers/{id}/commands', [SupplierController::class, 'assignCommand']);
     Route::delete('/suppliers/{id}/commands/{commandId}', [SupplierController::class, 'detachCommand']);
     
     // Supplier Workflow Endpoints (FS8)
     Route::put('/suppliers/{supplierId}/commands/{commandId}', [SupplierController::class, 'updateCommandStatus']);
-    Route::post('/suppliers/{supplierId}/commands/{commandId}/receive', [SupplierController::class, 'receiveCommand']);
-    Route::post('/suppliers/{supplierId}/commands/{commandId}/ship', [SupplierController::class, 'sendDelivery']);
-    Route::post('/suppliers/{supplierId}/commands/{commandId}/confirm', [SupplierController::class, 'confirmDelivery']);
+    Route::post('/suppliers/{supplierId}/commands/{commandId}/receive', [SupplierController::class, 'updateCommandStatus']);
+    Route::post('/suppliers/{supplierId}/commands/{commandId}/ship', [SupplierController::class, 'updateCommandDelivery']);
+    Route::post('/suppliers/{supplierId}/commands/{commandId}/confirm', [SupplierController::class, 'confirmShipment']);
 
     /*
     |-- Magasinier Specific Routes --|
@@ -97,10 +102,8 @@ Route::middleware('jwt')->group(function () {
         Route::get('/mouvements/{id}', [MouvementController::class, 'show']);
         Route::put('/mouvements/{id}', [MouvementController::class, 'update']);
 
-        // Products
-        Route::get('/products', [ProductController::class, 'index']);
+        // Products (create, update, delete - only for magasinier)
         Route::post('/products', [ProductController::class, 'store']);
-        Route::get('/products/{id}', [ProductController::class, 'show']);
         Route::put('/products/{id}', [ProductController::class, 'update']);
         Route::delete('/products/{id}', [ProductController::class, 'destroy']);
 
@@ -116,9 +119,18 @@ Route::middleware('jwt')->group(function () {
         Route::get('/archives', [ArchiveController::class, 'index']);
         Route::get('/archives/{id}', [ArchiveController::class, 'show']);
         Route::post('/archives', [ArchiveController::class, 'store']);
+        Route::get('/archives/statistics', [ArchiveController::class, 'getStatistics']);
+        Route::get('/archives/historical-value', [ArchiveController::class, 'getHistoricalValue']);
+        Route::get('/archives/changes', [ArchiveController::class, 'getChanges']);
+        Route::post('/archives/cleanup', [ArchiveController::class, 'cleanup']);
 
         // Confirm delivery (Magasinier receives shipment from supplier)
-        Route::put('/supplier-deliveries/{supplierId}/commands/{commandId}/confirm', [SupplierController::class, 'confirmDelivery']);
+        Route::put('/supplier-deliveries/{supplierId}/commands/{commandId}/confirm', [SupplierController::class, 'confirmShipment']);
+        
+        // Delivery Agent Assignment
+        Route::get('/delivery-agents', [CommandController::class, 'getAvailableDeliveryAgents']);
+        Route::post('/commands/{id}/assign-delivery-agent', [CommandController::class, 'assignDeliveryAgent']);
+        Route::get('/commands/for-delivery', [CommandController::class, 'getCommandsForDelivery']);
     });
 
     /*
@@ -127,8 +139,31 @@ Route::middleware('jwt')->group(function () {
     Route::middleware('supplier')->group(function () {
         // Supplier sees commands assigned to them
         Route::get('/my-commands', [SupplierController::class, 'receiveCommand']);
+        Route::get('/my-commands/{id}', [SupplierController::class, 'getCommands']);
+        Route::put('/my-commands/{commandId}/decision', [SupplierController::class, 'decideCommand']);
         // Supplier marks a command as shipped
         Route::put('/my-commands/{commandId}/ship', [SupplierController::class, 'sendDelivery']);
+        Route::put('/my-commands/{supplierId}/{commandId}/ship', [SupplierController::class, 'updateCommandDelivery']);
+    });
+
+    /*
+    |-- Delivery Agent Specific Routes --|
+    */
+    Route::middleware('delivery_agent')->group(function () {
+        // Delivery Agent CRUD Operations
+        Route::get('/my-deliveries', [DeliveryAgentController::class, 'index']);
+        Route::get('/my-deliveries/{id}', [DeliveryAgentController::class, 'show']);
+        Route::put('/my-deliveries/{id}/start', [DeliveryAgentController::class, 'startDelivery']);
+        Route::put('/my-deliveries/{id}/update-status', [DeliveryAgentController::class, 'updateStatus']);
+        Route::put('/my-deliveries/{id}/complete', [DeliveryAgentController::class, 'completeDelivery']);
+        
+        // Movement Management - Delivery Agent updates movement status
+        Route::post('/my-deliveries/{commandId}/movements', [DeliveryAgentController::class, 'updateMouvement']);
+        Route::get('/my-deliveries/{commandId}/movements', [DeliveryAgentController::class, 'getMovements']);
+        
+        // Admin-only routes for delivery management
+        Route::get('/deliveries/available', [DeliveryAgentController::class, 'getAvailableDeliveries']);
+        Route::post('/commands/{commandId}/assign-agent/{agentId}', [DeliveryAgentController::class, 'assignDeliveryAgent']);
     });
 
     /*

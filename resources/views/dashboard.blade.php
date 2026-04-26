@@ -178,14 +178,28 @@
     let alertsChartInstance = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
-        // Get current user role from the sidebar
-        const roleElement = document.getElementById('current-user-role');
-        const userRole = roleElement ? roleElement.innerText.toLowerCase() : '';
-        
-        // Only admin can access dashboard
-        if (userRole !== 'admin') {
-            // Redirect non-admin users to products page
-            window.location.href = '/products';
+        // Fetch the user role reliably from the API instead of the DOM
+        // (the DOM element is populated asynchronously and may not be ready yet)
+        let userRole = '';
+        try {
+            const userRes = await apiCall('/user', 'GET');
+            if (userRes.status === 200) {
+                userRole = userRes.data.role;
+            }
+        } catch (error) {
+            console.error("Failed to fetch user role for dashboard", error);
+            return;
+        }
+
+        // Only admin and magasinier can access the full dashboard
+        if (userRole !== 'admin' && userRole !== 'magasinier') {
+            // Redirect each role to their correct landing page
+            const redirectMap = {
+                'supplier': '/supplier-portal',
+                'delivery_agent': '/delivery-agent/dashboard',
+                'client': '/commands'
+            };
+            window.location.href = redirectMap[userRole] || '/commands';
             return;
         }
         

@@ -15,23 +15,23 @@ class CommandController extends Controller
         
         // If client, show only their commands
         if ($user->role === 'client') {
-            $commands = Command::where('client_id', $user->id)->with(['client', 'products'])->get();
+            $commands = Command::where('client_id', $user->id)->with(['client', 'products', 'deliveryAgent'])->get();
         } else {
             // Admin/magasinier sees all commands
-            $commands = Command::with(['client', 'products'])->get();
+            $commands = Command::with(['client', 'products', 'deliveryAgent'])->get();
         }
         
         return response()->json($commands);
     }
 
-    // Create a new command
     public function store(Request $request)
     {
+        $user = auth()->user();
+
         $validator = Validator::make($request->all(), [
             'command_type' => 'sometimes|string|max:50',
             'ordered_at'   => 'required|date',
             'expected_at'  => 'sometimes|date|after_or_equal:ordered_at',
-            'client_id'    => 'required|exists:users,id',
             'products'              => 'required|array',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity'   => 'required|integer|min:1',
@@ -41,6 +41,9 @@ class CommandController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
+
+        // Always use the authenticated user's ID as the client_id
+        $clientId = $user->id;
 
         // Calculate total cost
         $total_cost = 0;
@@ -55,7 +58,7 @@ class CommandController extends Controller
             'ordered_at'   => $request->ordered_at,
             'expected_at'  => $request->expected_at,
             'total_cost'   => $total_cost,
-            'client_id'    => $request->client_id,
+            'client_id'    => $clientId,
         ]);
 
         // Attach products to command
@@ -172,6 +175,98 @@ class CommandController extends Controller
                 'products_count' => $command->products()->count(),
             ],
             'tracking_details' => $command->getTrackingStatus()
+        ]);
+    }
+
+    /**
+     * Assign a delivery agent to a command (Magasinier/Admin only)
+     */
+    public function assignDeliveryAgent(Request $request, $id)
+    {
+        $user = auth()->user();
+        
+        // Only admin and magasinier can assign delivery agents
+        if (!in_array($user->role, ['admin', 'magasinier'])) {
+            return response()->json(['error' => 'Unauthorized. Only Admin and Magasinier can assign delivery agents.'], 403);
+        }
+
+        $command = Command::with(['products', 'deliveryAgent'])->find($id);
+
+        if (!$command) {
+            return response()->json(['error' => 'Command not found'], 404);
+        }
+
+        // Validate request
+        $validator = Validator::make($request->all(), [
+            'delivery_agent_id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Verify the user is actually a delivery agent
+        $deliveryAgent = \App\Models\User::find($request->delivery_agent_id);
+        if ($deliveryAgent->role !== 'delivery_agent') {
+            return response()->json(['error' => 'Selected user is not a delivery agent.'], 422);
+        }
+
+        // Assign delivery agent
+        $command->update([
+            'delivery_agent_id' => $request->delivery_agent_id,
+            'status' => 'approved',
+            'assigned_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Delivery agent assigned successfully',
+            'command' => $command->load(['client', 'products', 'deliveryAgent'])
+        ]);
+    }
+
+    /**
+     * Get available delivery agents (Magasinier/Admin only)
+     */
+    public function getAvailableDeliveryAgents()
+    {
+        $user = auth()->user();
+        
+        // Only admin and magasinier can view delivery agents
+        if (!in_array($user->role, ['admin', 'magasinier'])) {
+            return response()->json(['error' => 'Unauthorized. Only Admin and Magasinier can view this.'], 403);
+        }
+
+        $deliveryAgents = \App\Models\User::where('role', 'delivery_agent')
+            ->select('id', 'name', 'email')
+            ->get();
+
+        return response()->json([
+            'message' => 'Available delivery agents retrieved',
+            'delivery_agents' => $deliveryAgents
+        ]);
+    }
+
+    /**
+     * Get commands ready for delivery (assigned but not yet in transit)
+     */
+    public function getCommandsForDelivery()
+    {
+        $user = auth()->user();
+        
+        // Only admin and magasinier can view this
+        if (!in_array($user->role, ['admin', 'magasinier'])) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $commands = Command::with(['client', 'products', 'deliveryAgent'])
+            ->whereNotNull('delivery_agent_id')
+            ->whereNotIn('status', ['delivered', 'cancelled'])
+            ->orderBy('assigned_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'message' => 'Commands for delivery retrieved',
+            'commands' => $commands
         ]);
     }
 }

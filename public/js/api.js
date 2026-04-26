@@ -1,16 +1,5 @@
-// This file handles communication with our Laravel API.
-// It is designed to be extremely simple.
-
 const API_BASE_URL = 'http://localhost:8000/api';
 
-/**
- * Make an API request automatically attaching the JWT token.
- * 
- * @param {string} endpoint - Example: '/products'
- * @param {string} method - 'GET', 'POST', 'PUT', 'DELETE'
- * @param {object} data - Object containing data to send (optional)
- * @returns {Promise<any>} - JSON response from the server
- */
 async function apiCall(endpoint, method = 'GET', data = null) {
     const headers = {
         'Content-Type': 'application/json',

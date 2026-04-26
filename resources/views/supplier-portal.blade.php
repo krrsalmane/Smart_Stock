@@ -8,7 +8,7 @@
             My Assigned Commands
             <span class="ml-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-brand-warning/20 text-brand-warning border border-brand-warning/30" id="total_count">Loading...</span>
         </h2>
-        <p class="text-gray-400 mt-1">View commands assigned to you and manage deliveries.</p>
+        <p class="text-gray-400 mt-1">Review assigned commands, accept or decline them, then ship accepted ones.</p>
     </div>
 
     <!-- Data Table -->
@@ -64,12 +64,15 @@
                 items.forEach(item => {
                     const deliveryStatusColors = {
                         'pending': 'bg-brand-warning/20 text-brand-warning border-brand-warning/30',
+                        'confirmed': 'bg-brand-secondary/20 text-brand-secondary border-brand-secondary/30',
                         'shipped': 'bg-brand-primary/20 text-brand-primary border-brand-primary/30',
-                        'delivered': 'bg-brand-success/20 text-brand-success border-brand-success/30'
+                        'delivered': 'bg-brand-success/20 text-brand-success border-brand-success/30',
+                        'cancelled': 'bg-brand-danger/20 text-brand-danger border-brand-danger/30'
                     };
                     const badgeClass = deliveryStatusColors[item.delivery_status] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
 
-                    const canShip = item.delivery_status === 'pending';
+                    const canDecide = item.delivery_status === 'pending';
+                    const canShip = item.delivery_status === 'confirmed';
 
                     const row = `
                         <tr class="hover:bg-white/5 transition-colors group">
@@ -99,13 +102,22 @@
                                 ${item.delivered_at ? `<p class="text-[10px] text-gray-500 mt-1">Delivered: ${new Date(item.delivered_at).toLocaleDateString()}</p>` : ''}
                             </td>
                             <td class="px-6 py-4 text-center">
-                                ${canShip ? `
+                                ${canDecide ? `
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button onclick="decideCommand(${item.command_id}, 'accept')" class="bg-brand-success/20 text-brand-success hover:bg-brand-success/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center">
+                                            <i class="ph ph-check text-sm mr-1"></i> Accept
+                                        </button>
+                                        <button onclick="decideCommand(${item.command_id}, 'decline')" class="bg-brand-danger/20 text-brand-danger hover:bg-brand-danger/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center">
+                                            <i class="ph ph-x text-sm mr-1"></i> Decline
+                                        </button>
+                                    </div>
+                                ` : canShip ? `
                                     <button onclick="shipCommand(${item.command_id})" class="bg-brand-primary/20 text-brand-primary hover:bg-brand-primary/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center mx-auto">
                                         <i class="ph ph-truck text-sm mr-1"></i> Ship Now
                                     </button>
                                 ` : `
                                     <span class="text-gray-600 text-xs">
-                                        ${item.delivery_status === 'shipped' ? '<i class="ph ph-clock text-brand-primary"></i> Awaiting confirmation' : '<i class="ph ph-check-circle text-brand-success"></i> Complete'}
+                                        ${item.delivery_status === 'shipped' ? '<i class="ph ph-clock text-brand-primary"></i> Awaiting confirmation' : item.delivery_status === 'cancelled' ? '<i class="ph ph-x-circle text-brand-danger"></i> Declined' : '<i class="ph ph-check-circle text-brand-success"></i> Complete'}
                                     </span>
                                 `}
                             </td>
@@ -132,6 +144,23 @@
                 await loadMyCommands();
             } else {
                 showToast(res.data.message || 'Failed to ship', 'error');
+            }
+        } catch (error) {
+            showToast('Server error', 'error');
+        }
+    }
+
+    async function decideCommand(commandId, decision) {
+        const actionText = decision === 'accept' ? 'accept' : 'decline';
+        if (!confirm(`Are you sure you want to ${actionText} this command?`)) return;
+
+        try {
+            const res = await apiCall(`/my-commands/${commandId}/decision`, 'PUT', { decision });
+            if (res.status === 200) {
+                showToast(res.data.message || 'Command updated successfully!');
+                await loadMyCommands();
+            } else {
+                showToast(res.data.message || 'Failed to update command', 'error');
             }
         } catch (error) {
             showToast('Server error', 'error');

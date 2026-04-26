@@ -87,3 +87,8 @@ Route::get('/supplier-dashboard', function () {
 Route::get('/supplier-portal', function () {
     return view('supplier-portal');
 });
+
+// Delivery Agent Dashboard shell
+Route::get('/delivery-agent/dashboard', function () {
+    return view('delivery-agent-dashboard');
+});
